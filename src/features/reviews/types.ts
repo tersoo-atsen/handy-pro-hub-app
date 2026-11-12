@@ -1,0 +1,11 @@
+export interface Review {
+  id: string;
+  booking_id: string;
+  reviewer_id: string;
+  reviewee_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  reviewer_name?: string;
+  reviewer_avatar?: string;
+}
