@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getProfileById } from '@/features/profiles/services/profile-service';
 import { redirect } from 'next/navigation';
 
 export default async function DashboardRedirect() {
@@ -9,12 +10,8 @@ export default async function DashboardRedirect() {
     redirect('/login');
   }
 
-  // Fetch the user's role from the profiles table
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  // Fetch the user's role from the backend profiles endpoint
+  const { data: profile } = await getProfileById(user.id);
 
   const role = profile?.role ?? 'customer';
 

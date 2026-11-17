@@ -1,7 +1,7 @@
 'use client';
 import { Briefcase, Clock, Star, TrendingUp, Loader2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { useSupabase } from '@/providers/supabase-provider';
+import { upgradeToArtisan } from '@/features/artisans/services/artisan-service';
 import { useState } from 'react';
 
 const quickStats = [
@@ -13,19 +13,14 @@ const quickStats = [
 
 export default function CustomerDashboard() {
   const { profile, isLoading } = useUser();
-  const { supabase } = useSupabase();
   const [upgrading, setUpgrading] = useState(false);
 
   const handleUpgrade = async () => {
     if (!profile) return;
     setUpgrading(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: 'artisan' })
-      .eq('id', profile.id);
+    const { error } = await upgradeToArtisan(profile.id);
     if (!error) {
-      await supabase.from('artisan_profiles').upsert({ user_id: profile.id });
-      window.location.href = '/artisan/onboarding'; // or '/artisan/dashboard'
+      window.location.href = '/artisan/dashboard';
     }
     setUpgrading(false);
   };

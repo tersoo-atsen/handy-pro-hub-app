@@ -11,12 +11,12 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { useSupabase } from '@/providers/supabase-provider';
 import { signOut } from '@/features/auth/services/auth-service';
+import { upgradeToArtisan } from '@/features/artisans/services/artisan-service';
+import { updateProfile } from '@/features/profiles/services/profile-service';
 
 export default function CustomerProfilePage() {
   const { profile, isLoading } = useUser();
-  const { supabase } = useSupabase();
 
   const [saving, setSaving] = useState(false);
   const [prevProfileId, setPrevProfileId] = useState(profile?.id);
@@ -49,16 +49,13 @@ export default function CustomerProfilePage() {
     if (!profile) return;
     setSaving(true);
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        full_name: formData.fullName,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-      })
-      .eq('id', profile.id);
+    const { error } = await updateProfile(profile.id, {
+      full_name: formData.fullName,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+    });
 
     setSaving(false);
     if (!error) {
@@ -71,17 +68,13 @@ export default function CustomerProfilePage() {
       <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Profile</h1>
 
       {/* Upgrade to Artisan – only show if not already an artisan */}
-      {profile?.role !== 'artisan' && (
+      {profile && profile.role !== 'artisan' && (
         <button
           type="button"
           onClick={async () => {
             setSaving(true);
-            const { error } = await supabase
-              .from('profiles')
-              .update({ role: 'artisan' })
-              .eq('id', profile.id);
+            const { error } = await upgradeToArtisan(profile.id);
             if (!error) {
-              await supabase.from('artisan_profiles').upsert({ user_id: profile.id });
               window.location.href = '/artisan/dashboard';
             }
             setSaving(false);
