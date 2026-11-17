@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { signUp } from '@/features/auth/services/auth-service';
 import {
   User,
   Mail,
@@ -17,7 +17,6 @@ import {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -44,24 +43,19 @@ export default function RegisterPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          full_name: formData.full_name,
-          phone: formData.phone,
-          role: 'customer',
-        },
-      },
-    });
-
-    if (error) {
-      setError(error.message);
-      setIsLoading(false);
-    } else {
+    try {
+      await signUp({
+        full_name: formData.full_name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: 'customer',
+      });
       router.push('/dashboard');
       router.refresh();
+    } catch (err: any) {
+      setError(err.message ?? 'Sign-up failed');
+      setIsLoading(false);
     }
   };
 

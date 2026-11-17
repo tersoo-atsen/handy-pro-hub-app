@@ -2,8 +2,9 @@
 
 import { User, Mail, Phone, MapPin, Camera, Wrench, Star, LogOut, Loader2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { useSupabase } from '@/providers/supabase-provider';
 import { signOut } from '@/features/auth/services/auth-service';
+import { getArtisanProfile, updateArtisanProfile } from '@/features/artisans/services/artisan-service';
+import { updateProfile } from '@/features/profiles/services/profile-service';
 import { useState, useEffect } from 'react';
 
 export default function ArtisanProfilePage() {
@@ -14,9 +15,9 @@ export default function ArtisanProfilePage() {
   };
 
   const { profile, isLoading } = useUser();
-  const { supabase } = useSupabase();
 
   const [saving, setSaving] = useState(false);
+  const [savingProfessional, setSavingProfessional] = useState(false);
   const [prevProfileId, setPrevProfileId] = useState<string | undefined>(profile?.id);
   const [formData, setFormData] = useState({
     fullName: profile?.full_name || '',
@@ -24,6 +25,14 @@ export default function ArtisanProfilePage() {
     address: profile?.address || '',
     city: profile?.city || '',
     state: profile?.state || '',
+  });
+  const [professionalData, setProfessionalData] = useState({
+    bio: '',
+    hourlyRate: '',
+    yearsExperience: '',
+    serviceRadiusKm: '10',
+    ratingAvg: 0,
+    ratingCount: 0,
   });
 
   // Pre‑populate form when profile loads
@@ -37,23 +46,46 @@ export default function ArtisanProfilePage() {
         city: profile.city || '',
         state: profile.state || '',
       });
+
+      getArtisanProfile(profile.id).then(({ data }) => {
+        if (data) {
+          setProfessionalData({
+            bio: data.bio ?? '',
+            hourlyRate: data.hourly_rate != null ? String(data.hourly_rate) : '',
+            yearsExperience: data.years_experience != null ? String(data.years_experience) : '',
+            serviceRadiusKm: data.service_radius_km != null ? String(data.service_radius_km) : '10',
+            ratingAvg: Number(data.rating_avg ?? 0),
+            ratingCount: Number(data.rating_count ?? 0),
+          });
+        }
+      });
     }
   }, [profile, prevProfileId]);
+
+  const handleSaveProfessional = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile) return;
+    setSavingProfessional(true);
+    await updateArtisanProfile(profile.id, {
+      bio: professionalData.bio,
+      hourly_rate: professionalData.hourlyRate ? Number(professionalData.hourlyRate) : undefined,
+      years_experience: professionalData.yearsExperience ? Number(professionalData.yearsExperience) : undefined,
+      service_radius_km: professionalData.serviceRadiusKm ? Number(professionalData.serviceRadiusKm) : undefined,
+    });
+    setSavingProfessional(false);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
     setSaving(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        full_name: formData.fullName,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-      })
-      .eq('id', profile.id);
+    const { error } = await updateProfile(profile.id, {
+      full_name: formData.fullName,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+    });
     setSaving(false);
     if (!error) {
       // TODO: show toast / success feedback
@@ -82,7 +114,9 @@ export default function ArtisanProfilePage() {
           <h2 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>{profile?.full_name || 'Your Name'}</h2>
           <div className="flex items-center gap-2 mt-1">
             <Star className="h-4 w-4" style={{ color: '#F59E0B' }} />
-            <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>0.0 rating · 0 reviews</span>
+            <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {professionalData.ratingAvg.toFixed(1)} rating · {professionalData.ratingCount} reviews
+            </span>
           </div>
         </div>
       </div>
@@ -196,22 +230,65 @@ export default function ArtisanProfilePage() {
         <h3 className="font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>Professional Details</h3>
         <div>
           <label className="block text-sm font-medium mb-2">Bio</label>
-          <textarea rows={3} placeholder="Tell customers about your experience..." className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none" style={inputStyle} />
+          <textarea
+            rows={3}
+            placeholder="Tell customers about your experience..."
+            value={professionalData.bio}
+            onChange={(e) => setProfessionalData({ ...professionalData, bio: e.target.value })}
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none"
+            style={inputStyle}
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Hourly Rate (₦)</label>
-            <input type="number" placeholder="5,000" className="w-full rounded-xl px-4 py-3 text-sm outline-none" style={inputStyle} />
+            <input
+              type="number"
+              placeholder="5,000"
+              value={professionalData.hourlyRate}
+              onChange={(e) => setProfessionalData({ ...professionalData, hourlyRate: e.target.value })}
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+              style={inputStyle}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Years of Experience</label>
-            <input type="number" placeholder="5" className="w-full rounded-xl px-4 py-3 text-sm outline-none" style={inputStyle} />
+            <input
+              type="number"
+              placeholder="5"
+              value={professionalData.yearsExperience}
+              onChange={(e) => setProfessionalData({ ...professionalData, yearsExperience: e.target.value })}
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+              style={inputStyle}
+            />
           </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Service Radius (km)</label>
-          <input type="number" placeholder="10" className="w-full rounded-xl px-4 py-3 text-sm outline-none" style={inputStyle} />
+          <input
+            type="number"
+            placeholder="10"
+            value={professionalData.serviceRadiusKm}
+            onChange={(e) => setProfessionalData({ ...professionalData, serviceRadiusKm: e.target.value })}
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+            style={inputStyle}
+          />
         </div>
+        <button
+          type="button"
+          disabled={savingProfessional}
+          onClick={handleSaveProfessional}
+          className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+          style={{ boxShadow: 'var(--shadow-md)' }}
+        >
+          {savingProfessional ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+            </>
+          ) : (
+            'Save Professional Details'
+          )}
+        </button>
       </div>
 
       <button className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium transition-all" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: '#EF4444' }} onClick={async () => { await signOut(); window.location.href = '/login'; }}>

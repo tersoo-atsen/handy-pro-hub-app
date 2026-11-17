@@ -73,12 +73,17 @@ export default function LandingPage() {
                 Get Started
               </Link>
             </div>
-            <Link
-              href="/register"
-              className="md:hidden rounded-full px-4 py-2 text-sm font-semibold text-white gradient-primary"
-            >
-              Get Started
-            </Link>
+            <div className="flex items-center gap-3 md:hidden">
+              <Link href="/login" className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-white gradient-primary"
+              >
+                Get Started
+              </Link>
+            </div>
           </div>
         </div>
       </nav>

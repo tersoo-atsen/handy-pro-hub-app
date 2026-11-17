@@ -1,50 +1,31 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  const { pathname } = request.nextUrl;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  // Refresh the session - IMPORTANT!
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Redirect unauthenticated users to login (except public routes)
-  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/callback'];
+  // Public routes do not require authentication
+  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/callback', '/search'];
   const isPublicRoute = publicRoutes.some(
-    (route) => request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith('/api/')
+    (route) =>
+      pathname === route ||
+      pathname.startsWith(`${route}/`) ||
+      pathname.startsWith('/api/')
   );
 
-  if (!user && !isPublicRoute) {
+  if (isPublicRoute) {
+    return NextResponse.next({ request });
+  }
+
+  // Check for backend auth cookie (`access_token` or `handy_user`)
+  const token =
+    request.cookies.get('access_token')?.value ||
+    request.cookies.get('handy_user')?.value;
+
+  if (!token) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  return supabaseResponse;
+  return NextResponse.next({ request });
 }

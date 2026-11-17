@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/auth-provider';
-import { useSupabase } from '@/providers/supabase-provider';
+import { getProfileById } from '@/features/profiles/services/profile-service';
 
 export interface UserProfile {
   id: string;
@@ -21,7 +21,6 @@ export interface UserProfile {
 
 export function useUser() {
   const { user } = useAuth();
-  const { supabase } = useSupabase();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,20 +32,16 @@ export function useUser() {
     }
 
     async function fetchProfile() {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user!.id)
-        .single();
+      const { data, error } = await getProfileById(user!.id);
 
       if (!error && data) {
-        setProfile(data as unknown as UserProfile);
+        setProfile(data as UserProfile);
       }
       setIsLoading(false);
     }
 
     fetchProfile();
-  }, [user, supabase]);
+  }, [user]);
 
   return { profile, isLoading };
 }

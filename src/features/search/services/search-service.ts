@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { findNearbyArtisans } from '@/features/artisans/services/artisan-service';
 import type { SearchFilters } from '../types';
 
 const supabase = createClient();
@@ -8,12 +9,12 @@ export async function searchArtisans(filters: SearchFilters) {
     throw new Error('Location is required for search');
   }
 
-  return supabase.rpc('find_nearby_artisans', {
-    user_lat: filters.latitude,
-    user_lng: filters.longitude,
-    radius_km: filters.radiusKm ?? 10,
-    category_slug: filters.category,
-  });
+  return findNearbyArtisans(
+    filters.latitude,
+    filters.longitude,
+    filters.radiusKm ?? 10,
+    filters.category
+  );
 }
 
 export async function searchCategories(query: string) {
