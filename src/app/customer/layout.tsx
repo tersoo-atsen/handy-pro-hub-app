@@ -21,7 +21,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)' }}
       >
         <Link href="/customer/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+          <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
             <span className="font-bold text-sm">H</span>
           </div>
           <span className="text-lg font-bold hidden sm:inline" style={{ fontFamily: 'var(--font-outfit)' }}>
@@ -34,7 +34,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <NavLink
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
+              className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
               style={{ color: 'var(--color-text-secondary)' }}
               activeStyle={{ backgroundColor: 'var(--color-primary-50)' }}
               activeClassName="font-semibold"

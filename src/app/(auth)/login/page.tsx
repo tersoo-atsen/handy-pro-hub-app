@@ -37,7 +37,7 @@ export default function LoginPage() {
         <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
         <div className="relative z-10 text-center">
-          <div className="h-16 w-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6">
+          <div className="h-16 w-16 rounded-md bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6">
             <span className="font-bold text-2xl">H</span>
           </div>
           <h1 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
@@ -69,7 +69,7 @@ export default function LoginPage() {
           </p>
 
           {error && (
-            <div className="mb-6 rounded-lg p-4 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <div className="mb-6 rounded-md p-4 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
               {error}
             </div>
           )}
@@ -86,7 +86,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none transition-all"
+                  className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none transition-all"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                 />
               </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-xl pl-11 pr-12 py-3 text-sm outline-none transition-all"
+                  className="w-full rounded-md pl-11 pr-12 py-3 text-sm outline-none transition-all"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                 />
                 <button
@@ -131,7 +131,7 @@ export default function LoginPage() {
               id="login-submit"
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] gradient-primary disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] gradient-primary disabled:opacity-60"
               style={{ boxShadow: 'var(--shadow-md)' }}
             >
               {isLoading ? (

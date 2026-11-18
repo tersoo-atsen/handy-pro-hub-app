@@ -104,7 +104,7 @@ export default function ArtisanAvailabilityPage() {
       </div>
 
       <div
-        className="rounded-2xl p-6 space-y-4"
+        className="rounded-md p-6 space-y-4"
         style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
       >
         {days.map((day, i) => (
@@ -130,7 +130,7 @@ export default function ArtisanAvailabilityPage() {
                 disabled={!schedule[i]?.enabled}
                 value={schedule[i]?.start_time ?? '08:00'}
                 onChange={(e) => updateTime(i, 'start_time', e.target.value)}
-                className="rounded-lg px-3 py-1.5 text-sm outline-none disabled:opacity-50"
+                className="rounded-md px-3 py-1.5 text-sm outline-none disabled:opacity-50"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
               />
               <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>to</span>
@@ -139,7 +139,7 @@ export default function ArtisanAvailabilityPage() {
                 disabled={!schedule[i]?.enabled}
                 value={schedule[i]?.end_time ?? '17:00'}
                 onChange={(e) => updateTime(i, 'end_time', e.target.value)}
-                className="rounded-lg px-3 py-1.5 text-sm outline-none disabled:opacity-50"
+                className="rounded-md px-3 py-1.5 text-sm outline-none disabled:opacity-50"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
               />
             </div>
@@ -150,7 +150,7 @@ export default function ArtisanAvailabilityPage() {
           type="button"
           disabled={saving}
           onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all mt-4 disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all mt-4 disabled:opacity-60"
           style={{ boxShadow: 'var(--shadow-md)' }}
         >
           {saving ? (

@@ -88,13 +88,13 @@ export default function ArtisanBookingsPage() {
         <p style={{ color: 'var(--color-text-secondary)' }}>Manage your upcoming and completed jobs</p>
       </div>
 
-      <div className="flex gap-1 rounded-xl p-1" style={{ background: 'var(--color-bg-secondary)' }}>
+      <div className="flex gap-1 rounded-md p-1" style={{ background: 'var(--color-bg-secondary)' }}>
         {['Upcoming', 'In Progress', 'Completed', 'Cancelled'].map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            className="flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all"
             style={{
               background: activeTab === tab ? 'var(--color-surface)' : 'transparent',
               color: activeTab === tab ? 'var(--color-text)' : 'var(--color-text-secondary)',
@@ -108,7 +108,7 @@ export default function ArtisanBookingsPage() {
 
       {loading ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" style={{ color: 'var(--color-primary)' }} />
@@ -116,7 +116,7 @@ export default function ArtisanBookingsPage() {
         </div>
       ) : filteredBookings.length === 0 ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'var(--color-primary-50)' }}>
@@ -136,7 +136,7 @@ export default function ArtisanBookingsPage() {
             return (
               <div
                 key={booking.id}
-                className="rounded-2xl p-6 space-y-3"
+                className="rounded-md p-6 space-y-3"
                 style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
               >
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -167,7 +167,7 @@ export default function ArtisanBookingsPage() {
                       type="button"
                       disabled={messagingBookingId === booking.id}
                       onClick={() => handleMessageCustomer(booking)}
-                      className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold transition-all disabled:opacity-60"
                       style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
                     >
                       {messagingBookingId === booking.id ? (
@@ -182,7 +182,7 @@ export default function ArtisanBookingsPage() {
                         type="button"
                         disabled={updatingId === booking.id}
                         onClick={() => handleStatusChange(booking.id, 'in_progress')}
-                        className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
                       >
                         {updatingId === booking.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -197,7 +197,7 @@ export default function ArtisanBookingsPage() {
                         type="button"
                         disabled={updatingId === booking.id}
                         onClick={() => handleStatusChange(booking.id, 'completed')}
-                        className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
                       >
                         {updatingId === booking.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -212,7 +212,7 @@ export default function ArtisanBookingsPage() {
                         type="button"
                         disabled={updatingId === booking.id}
                         onClick={() => handleStatusChange(booking.id, 'cancelled')}
-                        className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium transition-all disabled:opacity-60"
+                        className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium transition-all disabled:opacity-60"
                         style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}
                       >
                         {updatingId === booking.id ? (

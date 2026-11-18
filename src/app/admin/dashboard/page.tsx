@@ -15,10 +15,10 @@ export default function AdminDashboard() {
         {adminStats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl p-5"
+            className="rounded-md p-5"
             style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
           >
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ background: `${stat.color}15` }}>
+            <div className="h-10 w-10 rounded-md flex items-center justify-center mb-3" style={{ background: `${stat.color}15` }}>
               <stat.icon className="h-5 w-5" style={{ color: stat.color }} />
             </div>
             <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>{stat.value}</p>

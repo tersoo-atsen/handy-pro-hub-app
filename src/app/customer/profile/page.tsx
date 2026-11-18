@@ -80,7 +80,7 @@ export default function CustomerProfilePage() {
             setSaving(false);
           }}
           disabled={saving}
-          className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ boxShadow: 'var(--shadow-md)' }}
         >
           {saving ? (
@@ -95,7 +95,7 @@ export default function CustomerProfilePage() {
 
       {/* Avatar section */}
       <div
-        className="rounded-2xl p-6 flex items-center gap-6"
+        className="rounded-md p-6 flex items-center gap-6"
         style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
       >
         <div className="relative">
@@ -120,7 +120,7 @@ export default function CustomerProfilePage() {
 
       {/* Profile form */}
       <div
-        className="rounded-2xl p-6 space-y-5"
+        className="rounded-md p-6 space-y-5"
         style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
       >
         <h3 className="font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>Personal Information</h3>
@@ -137,7 +137,7 @@ export default function CustomerProfilePage() {
               placeholder="Your full name"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+              className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function CustomerProfilePage() {
               placeholder="you@example.com"
               disabled
               value={profile?.email || ''}
-              className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none opacity-60"
+              className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none opacity-60"
               style={{
                 background: 'var(--color-bg-secondary)',
                 border: '1px solid var(--color-border)',
@@ -176,7 +176,7 @@ export default function CustomerProfilePage() {
               placeholder="+234 800 000 0000"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+              className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
               style={{
                 background: 'var(--color-bg-secondary)',
                 border: '1px solid var(--color-border)',
@@ -198,7 +198,7 @@ export default function CustomerProfilePage() {
               placeholder="Your address"
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+              className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
               style={{
                 background: 'var(--color-bg-secondary)',
                 border: '1px solid var(--color-border)',
@@ -220,7 +220,7 @@ export default function CustomerProfilePage() {
               placeholder="Your city"
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+              className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
               style={{
                 background: 'var(--color-bg-secondary)',
                 border: '1px solid var(--color-border)',
@@ -242,7 +242,7 @@ export default function CustomerProfilePage() {
               placeholder="Your state"
               value={formData.state}
               onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-              className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+              className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
               style={{
                 background: 'var(--color-bg-secondary)',
                 border: '1px solid var(--color-border)',
@@ -256,7 +256,7 @@ export default function CustomerProfilePage() {
           type="button"
           disabled={saving}
           onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           style={{ boxShadow: 'var(--shadow-md)' }}
         >
           {saving ? (
@@ -276,7 +276,7 @@ export default function CustomerProfilePage() {
           await signOut();
           window.location.href = '/login';
         }}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium transition-all"
+        className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-all"
         style={{
           background: 'var(--color-surface)',
           border: '1px solid var(--color-border)',

@@ -106,7 +106,7 @@ export default function ArtisanMessagesPage() {
 
       <div className="grid md:grid-cols-3 gap-6" style={{ minHeight: '60vh' }}>
         <div
-          className="md:col-span-1 rounded-2xl p-4 space-y-2 overflow-y-auto"
+          className="md:col-span-1 rounded-md p-4 space-y-2 overflow-y-auto"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}
         >
           {loadingConversations ? (
@@ -127,7 +127,7 @@ export default function ArtisanMessagesPage() {
                   key={conv.id}
                   type="button"
                   onClick={() => setSelectedConversation(conv)}
-                  className="w-full text-left rounded-xl p-3 transition-all flex items-start gap-3"
+                  className="w-full text-left rounded-md p-3 transition-all flex items-start gap-3"
                   style={{
                     background: isSelected ? 'var(--color-primary-50)' : 'transparent',
                     border: `1px solid ${isSelected ? 'var(--color-primary)' : 'transparent'}`,
@@ -159,7 +159,7 @@ export default function ArtisanMessagesPage() {
         </div>
 
         <div
-          className="md:col-span-2 rounded-2xl flex flex-col overflow-hidden"
+          className="md:col-span-2 rounded-md flex flex-col overflow-hidden"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}
         >
           {!selectedConversation ? (
@@ -206,7 +206,7 @@ export default function ArtisanMessagesPage() {
                         className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className="max-w-[75%] rounded-2xl px-4 py-2.5 text-sm"
+                          className="max-w-[75%] rounded-md px-4 py-2.5 text-sm"
                           style={{
                             background: isMine ? 'var(--color-primary-50)' : 'var(--color-bg-secondary)',
                             color: 'var(--color-text)',
@@ -236,7 +236,7 @@ export default function ArtisanMessagesPage() {
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none"
+                  className="flex-1 rounded-md px-4 py-2.5 text-sm outline-none"
                   style={{
                     background: 'var(--color-bg-secondary)',
                     border: '1px solid var(--color-border)',
@@ -246,7 +246,7 @@ export default function ArtisanMessagesPage() {
                 <button
                   type="submit"
                   disabled={sending || !draft.trim()}
-                  className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
                 >
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </button>

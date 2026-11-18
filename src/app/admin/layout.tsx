@@ -18,7 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="h-16 flex items-center px-6">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-red-600 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-md bg-red-600 flex items-center justify-center">
               <span className="font-bold text-sm" style={{ color: 'var(--color-text-inverse)' }}>A</span>
             </div>
             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Admin Panel</span>
@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <NavLink
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
               style={{ color: 'var(--color-text-secondary)' }}
               activeStyle={{ backgroundColor: 'var(--color-primary-50)' }}
               activeClassName="font-semibold"

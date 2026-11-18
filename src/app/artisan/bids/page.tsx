@@ -58,13 +58,13 @@ export default function ArtisanBidsPage() {
         <p style={{ color: 'var(--color-text-secondary)' }}>Track your submitted bids and their status</p>
       </div>
 
-      <div className="flex gap-1 rounded-xl p-1" style={{ background: 'var(--color-bg-secondary)' }}>
+      <div className="flex gap-1 rounded-md p-1" style={{ background: 'var(--color-bg-secondary)' }}>
         {['All', 'Pending', 'Accepted', 'Rejected', 'Expired'].map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            className="flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all"
             style={{
               background: activeTab === tab ? 'var(--color-surface)' : 'transparent',
               color: activeTab === tab ? 'var(--color-text)' : 'var(--color-text-secondary)',
@@ -78,7 +78,7 @@ export default function ArtisanBidsPage() {
 
       {loading ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" style={{ color: 'var(--color-primary)' }} />
@@ -86,7 +86,7 @@ export default function ArtisanBidsPage() {
         </div>
       ) : filteredBids.length === 0 ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'var(--color-primary-50)' }}>
@@ -94,7 +94,7 @@ export default function ArtisanBidsPage() {
           </div>
           <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>No bids yet</h3>
           <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>Browse nearby jobs and place your first bid</p>
-          <a href="/artisan/jobs" className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white gradient-primary">
+          <a href="/artisan/jobs" className="inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white gradient-primary">
             Browse Jobs
           </a>
         </div>
@@ -106,7 +106,7 @@ export default function ArtisanBidsPage() {
             return (
               <div
                 key={bid.id}
-                className="rounded-2xl p-6 space-y-3"
+                className="rounded-md p-6 space-y-3"
                 style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -137,7 +137,7 @@ export default function ArtisanBidsPage() {
                       type="button"
                       disabled={withdrawingId === bid.id}
                       onClick={() => handleWithdraw(bid.id)}
-                      className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-60"
                       style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}
                     >
                       {withdrawingId === bid.id ? (

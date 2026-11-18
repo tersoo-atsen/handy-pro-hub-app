@@ -14,13 +14,13 @@ export default function AdminJobsPage() {
           <input
             type="text"
             placeholder="Search jobs..."
-            className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+            className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
             style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
           />
         </div>
         <div className="flex gap-2">
           {['All', 'Open', 'In Progress', 'Completed', 'Disputed'].map((f) => (
-            <button key={f} className="rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-all" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+            <button key={f} className="rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-all" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
               {f}
             </button>
           ))}
@@ -33,9 +33,9 @@ export default function AdminJobsPage() {
           { label: 'Active Now', value: '0', icon: Clock, color: '#F59E0B' },
           { label: 'Completed', value: '0', icon: CheckCircle, color: 'var(--color-accent)' },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-xl p-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}>
+          <div key={stat.label} className="rounded-md p-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: `${stat.color}15` }}>
+              <div className="h-10 w-10 rounded-md flex items-center justify-center" style={{ background: `${stat.color}15` }}>
                 <stat.icon className="h-5 w-5" style={{ color: stat.color }} />
               </div>
               <div>
@@ -48,7 +48,7 @@ export default function AdminJobsPage() {
       </div>
 
       <div
-        className="rounded-2xl overflow-hidden"
+        className="rounded-md overflow-hidden"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}
       >
         <table className="w-full">
