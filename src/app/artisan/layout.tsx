@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LayoutDashboard, MapPin, Gavel, Calendar, MessageSquare, User, Clock } from 'lucide-react';
+import { NavLink } from '@/components/nav-link';
 
 const artisanNav = [
   { label: 'Dashboard', href: '/artisan/dashboard', icon: LayoutDashboard },
@@ -31,15 +32,17 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {artisanNav.map((item) => (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
               style={{ color: 'var(--color-text-secondary)' }}
+              activeStyle={{ backgroundColor: 'var(--color-primary-50)' }}
+              activeClassName="font-semibold"
             >
               <item.icon className="h-5 w-5" />
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
         <div className="p-4" style={{ borderTop: '1px solid var(--color-border)' }}>
@@ -80,15 +83,16 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
           style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)' }}
         >
           {artisanNav.slice(0, 5).map((item) => (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
               className="flex flex-col items-center gap-1 px-3 py-1 text-xs"
               style={{ color: 'var(--color-text-secondary)' }}
+              activeClassName="font-semibold"
             >
               <item.icon className="h-5 w-5" />
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
       </div>
