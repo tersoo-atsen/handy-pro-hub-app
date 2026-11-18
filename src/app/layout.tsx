@@ -46,7 +46,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col" style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}>
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col"
+        style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}
+      >
         <SupabaseProvider>
           <AuthProvider>{children}</AuthProvider>
         </SupabaseProvider>
