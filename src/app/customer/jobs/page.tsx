@@ -105,7 +105,7 @@ export default function CustomerJobsPage() {
         </div>
         <Link
           href="/customer/jobs/new"
-          className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white gradient-primary hover:scale-105 transition-transform"
+          className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-semibold text-white gradient-primary hover:scale-105 transition-transform"
           style={{ boxShadow: 'var(--shadow-md)' }}
         >
           <Plus className="h-4 w-4" />
@@ -114,13 +114,13 @@ export default function CustomerJobsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl p-1" style={{ background: 'var(--color-bg-secondary)' }}>
+      <div className="flex gap-1 rounded-md p-1" style={{ background: 'var(--color-bg-secondary)' }}>
         {['All', 'Active', 'Completed', 'Cancelled'].map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            className="flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all"
             style={{
               background: activeTab === tab ? 'var(--color-surface)' : 'transparent',
               color: activeTab === tab ? 'var(--color-text)' : 'var(--color-text-secondary)',
@@ -135,7 +135,7 @@ export default function CustomerJobsPage() {
       {/* Results / Empty state */}
       {loading ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" style={{ color: 'var(--color-primary)' }} />
@@ -143,7 +143,7 @@ export default function CustomerJobsPage() {
         </div>
       ) : filteredJobs.length === 0 ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'var(--color-primary-50)' }}>
@@ -153,7 +153,7 @@ export default function CustomerJobsPage() {
           <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>Create your first job request to find skilled artisans</p>
           <Link
             href="/customer/jobs/new"
-            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white gradient-primary"
+            className="inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white gradient-primary"
           >
             <Plus className="h-4 w-4" /> Post a Job
           </Link>
@@ -166,7 +166,7 @@ export default function CustomerJobsPage() {
             return (
               <div
                 key={job.id}
-                className="rounded-2xl p-6 space-y-3"
+                className="rounded-md p-6 space-y-3"
                 style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -195,7 +195,7 @@ export default function CustomerJobsPage() {
                   <button
                     type="button"
                     onClick={() => handleToggleBids(job.id)}
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all"
+                    className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold transition-all"
                     style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
                   >
                     <Gavel className="h-3.5 w-3.5" />
@@ -245,7 +245,7 @@ export default function CustomerJobsPage() {
                         {bidsForJob.map((bid) => (
                           <div
                             key={bid.id}
-                            className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                            className="rounded-md p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)' }}
                           >
                             <div className="space-y-1">
@@ -277,7 +277,7 @@ export default function CustomerJobsPage() {
                                 type="button"
                                 disabled={messagingBidId === bid.id}
                                 onClick={() => handleMessageBidder(job.id, bid)}
-                                className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:opacity-60"
+                                className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition-all disabled:opacity-60"
                                 style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
                               >
                                 {messagingBidId === bid.id ? (
@@ -292,7 +292,7 @@ export default function CustomerJobsPage() {
                                   type="button"
                                   disabled={acceptingBidId === bid.id}
                                   onClick={() => handleAcceptBid(job.id, bid.id)}
-                                  className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                                  className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
                                 >
                                   {acceptingBidId === bid.id ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

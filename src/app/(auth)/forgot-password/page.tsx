@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
             <p className="mb-8" style={{ color: 'var(--color-text-secondary)' }}>Enter your email and we&apos;ll send you a reset link</p>
 
             {error && (
-              <div className="mb-6 rounded-lg p-4 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>{error}</div>
+              <div className="mb-6 rounded-md p-4 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>{error}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+                    className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
                     style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                   />
                 </div>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
               >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Send Reset Link'}
               </button>

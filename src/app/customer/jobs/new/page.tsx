@@ -96,13 +96,13 @@ export default function NewJobPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg p-4 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>
+        <div className="rounded-md p-4 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>
           {error}
         </div>
       )}
 
       <form
-        className="space-y-5 rounded-2xl p-6"
+        className="space-y-5 rounded-md p-6"
         style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', border: '1px solid var(--color-border-light)' }}
         onSubmit={handleSubmit}
       >
@@ -114,7 +114,7 @@ export default function NewJobPage() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Fix leaking kitchen pipe"
             required
-            className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+            className="w-full rounded-md px-4 py-3 text-sm outline-none"
             style={inputStyle}
           />
         </div>
@@ -125,7 +125,7 @@ export default function NewJobPage() {
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             required
-            className="w-full rounded-xl px-4 py-3 text-sm outline-none appearance-none"
+            className="w-full rounded-md px-4 py-3 text-sm outline-none appearance-none"
             style={inputStyle}
           >
             <option value="">Select a category</option>
@@ -143,7 +143,7 @@ export default function NewJobPage() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the job in detail..."
             required
-            className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none"
+            className="w-full rounded-md px-4 py-3 text-sm outline-none resize-none"
             style={inputStyle}
           />
         </div>
@@ -156,7 +156,7 @@ export default function NewJobPage() {
                 key={level}
                 type="button"
                 onClick={() => setUrgency(level)}
-                className="rounded-xl px-3 py-2 text-sm font-medium capitalize transition-all"
+                className="rounded-md px-3 py-2 text-sm font-medium capitalize transition-all"
                 style={{
                   background: urgency === level ? 'var(--color-primary-50)' : 'var(--color-bg-secondary)',
                   border: `1px solid ${urgency === level ? 'var(--color-primary)' : 'var(--color-border)'}`,
@@ -177,7 +177,7 @@ export default function NewJobPage() {
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
               placeholder="5,000"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+              className="w-full rounded-md px-4 py-3 text-sm outline-none"
               style={inputStyle}
             />
           </div>
@@ -188,7 +188,7 @@ export default function NewJobPage() {
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
               placeholder="50,000"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+              className="w-full rounded-md px-4 py-3 text-sm outline-none"
               style={inputStyle}
             />
           </div>
@@ -202,7 +202,7 @@ export default function NewJobPage() {
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Enter your address"
             required
-            className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+            className="w-full rounded-md px-4 py-3 text-sm outline-none"
             style={inputStyle}
           />
         </div>
@@ -210,7 +210,7 @@ export default function NewJobPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-semibold text-white gradient-primary hover:scale-[1.02] transition-all disabled:opacity-60"
           style={{ boxShadow: 'var(--shadow-md)' }}
         >
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Send className="h-4 w-4" /> Post Job Request</>}

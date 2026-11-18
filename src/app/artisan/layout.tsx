@@ -23,7 +23,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
       >
         <div className="h-16 flex items-center justify-between px-6">
           <Link href="/artisan/dashboard" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+            <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
               <span className="font-bold text-sm">H</span>
             </div>
             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
@@ -37,7 +37,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
             <NavLink
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-(--color-surface-hover)"
               style={{ color: 'var(--color-text-secondary)' }}
               activeStyle={{ backgroundColor: 'var(--color-primary-50)' }}
               activeClassName="font-semibold"
@@ -49,7 +49,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         </nav>
         <div className="p-4" style={{ borderTop: '1px solid var(--color-border)' }}>
           <div
-            className="rounded-xl p-4 text-center text-sm"
+            className="rounded-md p-4 text-center text-sm"
             style={{ background: 'var(--color-primary-50)' }}
           >
             <p className="font-medium" style={{ color: 'var(--color-primary)' }}>Pro Artisan</p>
@@ -66,7 +66,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
           style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
         >
           <Link href="/artisan/dashboard" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+            <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
               <span className="font-bold text-sm">H</span>
             </div>
             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>

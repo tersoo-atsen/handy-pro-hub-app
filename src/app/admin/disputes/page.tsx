@@ -8,16 +8,16 @@ export default function AdminDisputesPage() {
         <p style={{ color: 'var(--color-text-secondary)' }}>Review and resolve reported issues</p>
       </div>
 
-      <div className="flex gap-1 rounded-xl p-1" style={{ background: 'var(--color-bg-secondary)' }}>
+      <div className="flex gap-1 rounded-md p-1" style={{ background: 'var(--color-bg-secondary)' }}>
         {['Open', 'Under Review', 'Resolved'].map((tab) => (
-          <button key={tab} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all" style={{ color: 'var(--color-text-secondary)' }}>
+          <button key={tab} className="flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all" style={{ color: 'var(--color-text-secondary)' }}>
             {tab}
           </button>
         ))}
       </div>
 
       <div
-        className="rounded-2xl p-12 text-center"
+        className="rounded-md p-12 text-center"
         style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
       >
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'rgba(16,185,129,0.1)' }}>

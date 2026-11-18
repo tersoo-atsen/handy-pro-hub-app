@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, MapPin, Star, Shield, Zap, Users, Clock, CheckCircle } from 'lucide-react';
+import { ArrowRight, MapPin, Star, Shield, Zap, Users, CheckCircle } from 'lucide-react';
 
 const categories = [
   { name: 'Plumbing', slug: 'plumbing', icon: '🔧', color: 'from-blue-500 to-cyan-400' },
@@ -50,11 +50,11 @@ export default function LandingPage() {
   return (
     <main className="flex flex-col">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-(--color-surface) border-b border-(--color-border)">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+              <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
                 <span className="font-bold text-sm">H</span>
               </div>
               <span className="text-xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
@@ -161,7 +161,7 @@ export default function LandingPage() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl p-6 text-center transition-transform hover:scale-105"
+                className="rounded-md p-6 text-center transition-transform hover:scale-105"
                 style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
               >
                 <div className="text-3xl font-bold text-gradient" style={{ fontFamily: 'var(--font-outfit)' }}>
@@ -196,15 +196,15 @@ export default function LandingPage() {
               <Link
                 key={cat.slug}
                 href={`/search?category=${cat.slug}`}
-                className="group relative overflow-hidden rounded-2xl p-6 text-center transition-all hover:scale-105 hover:-translate-y-1"
+                className="group relative overflow-hidden rounded-md p-6 text-center transition-all hover:scale-105 hover:-translate-y-1"
                 style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
               >
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${cat.color} text-2xl mb-3`}>
+                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-md bg-linear-to-br ${cat.color} text-2xl mb-3`}>
                   {cat.icon}
                 </div>
                 <h3 className="font-semibold text-sm">{cat.name}</h3>
                 <div
-                  className="absolute inset-x-0 bottom-0 h-1 transition-all duration-300 opacity-0 group-hover:opacity-100 bg-gradient-to-r"
+                  className="absolute inset-x-0 bottom-0 h-1 transition-all duration-300 opacity-0 group-hover:opacity-100 bg-linear-to-r"
                   style={{ background: 'var(--color-primary)' }}
                 />
               </Link>
@@ -232,7 +232,7 @@ export default function LandingPage() {
             {steps.map((item) => (
               <div key={item.step} className="relative group">
                 <div
-                  className="rounded-2xl p-8 h-full transition-all hover:-translate-y-2"
+                  className="rounded-md p-8 h-full transition-all hover:-translate-y-2"
                   style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', border: '1px solid var(--color-border-light)' }}
                 >
                   <span
@@ -264,7 +264,7 @@ export default function LandingPage() {
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
-            className="relative overflow-hidden rounded-3xl gradient-primary p-12 md:p-20 text-center"
+            className="relative overflow-hidden rounded-md gradient-primary p-12 md:p-20 text-center"
             style={{ boxShadow: 'var(--shadow-xl)' }}
           >
             <div
@@ -309,7 +309,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
+              <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
                 <span className="font-bold text-sm">H</span>
               </div>
               <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>

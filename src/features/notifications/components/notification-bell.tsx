@@ -134,7 +134,7 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className="relative h-9 w-9 rounded-xl flex items-center justify-center transition-colors hover:bg-[var(--color-surface-hover)]"
+        className="relative h-9 w-9 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--color-surface-hover)]"
         style={{ color: 'var(--color-text-secondary)' }}
         aria-label="Notifications"
       >
@@ -152,7 +152,7 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
         <div
           className={`absolute ${
             align === 'left' ? 'left-0' : 'right-0'
-          } mt-2 w-80 max-w-[calc(100vw-2rem)] max-h-96 overflow-y-auto rounded-2xl p-4 z-50 space-y-3`}
+          } mt-2 w-80 max-w-[calc(100vw-2rem)] max-h-96 overflow-y-auto rounded-md p-4 z-50 space-y-3`}
           style={{
             background: 'var(--color-surface)',
             boxShadow: 'var(--shadow-xl)',
@@ -187,7 +187,7 @@ export function NotificationBell({ align = 'right' }: NotificationBellProps) {
                   key={n.id}
                   type="button"
                   onClick={() => handleNotificationClick(n)}
-                  className="w-full text-left rounded-xl p-3 transition-all block cursor-pointer hover:bg-[var(--color-surface-hover)]"
+                  className="w-full text-left rounded-md p-3 transition-all block cursor-pointer hover:bg-[var(--color-surface-hover)]"
                   style={{
                     background: n.is_read ? 'transparent' : 'var(--color-primary-50)',
                     border: `1px solid ${n.is_read ? 'var(--color-border-light)' : 'var(--color-primary-200)'}`,

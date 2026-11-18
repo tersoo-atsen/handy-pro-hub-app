@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search users by name or email..."
-            className="w-full rounded-xl pl-11 pr-4 py-3 text-sm outline-none"
+            className="w-full rounded-md pl-11 pr-4 py-3 text-sm outline-none"
             style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
           />
         </div>
@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
               key={filter}
               type="button"
               onClick={() => setActiveFilter(filter)}
-              className="rounded-lg px-4 py-2 text-sm font-medium transition-all"
+              className="rounded-md px-4 py-2 text-sm font-medium transition-all"
               style={{
                 background: activeFilter === filter ? 'var(--color-primary-50)' : 'var(--color-surface)',
                 border: `1px solid ${activeFilter === filter ? 'var(--color-primary)' : 'var(--color-border)'}`,
@@ -79,9 +79,9 @@ export default function AdminUsersPage() {
           { label: 'Verified Artisans', value: String(verifiedArtisansCount), icon: Shield, color: 'var(--color-accent)' },
           { label: 'Active Accounts', value: String(activeCount), icon: UserCheck, color: '#F59E0B' },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-xl p-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}>
+          <div key={stat.label} className="rounded-md p-4" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: `${stat.color}15` }}>
+              <div className="h-10 w-10 rounded-md flex items-center justify-center" style={{ background: `${stat.color}15` }}>
                 <stat.icon className="h-5 w-5" style={{ color: stat.color }} />
               </div>
               <div>
@@ -95,7 +95,7 @@ export default function AdminUsersPage() {
 
       {/* Table */}
       <div
-        className="rounded-2xl overflow-hidden"
+        className="rounded-md overflow-hidden"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)' }}
       >
         <table className="w-full">
