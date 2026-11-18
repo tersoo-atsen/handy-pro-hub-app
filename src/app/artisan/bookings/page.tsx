@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, DollarSign, User, Play, CheckCircle, XCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { Calendar, Clock, DollarSign, User, Play, CheckCircle, XCircle, MessageSquare, Star, Loader2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { getMyBookings, updateBookingStatus } from '@/features/bookings/services/booking-service';
 import { getOrCreateConversation } from '@/features/messaging/services/message-service';
+import { ReviewForm } from '@/features/reviews/components/review-form';
 
 const statusBadgeStyles: Record<string, { bg: string; color: string }> = {
   pending: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B' },
@@ -23,6 +24,7 @@ export default function ArtisanBookingsPage() {
   const [activeTab, setActiveTab] = useState('Upcoming');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [messagingBookingId, setMessagingBookingId] = useState<string | null>(null);
+  const [reviewingBookingId, setReviewingBookingId] = useState<string | null>(null);
 
   const handleMessageCustomer = async (booking: any) => {
     if (!profile?.id || !booking.customer_id) return;
@@ -132,6 +134,9 @@ export default function ArtisanBookingsPage() {
             const job = booking.job_requests;
             const customerName =
               booking.profiles_bookings_customer_idToprofiles?.full_name ?? 'Customer';
+            const myReview = Array.isArray(booking.reviews)
+              ? booking.reviews.find((r: any) => r.reviewer_id === profile?.id)
+              : null;
 
             return (
               <div
@@ -223,6 +228,29 @@ export default function ArtisanBookingsPage() {
                         Cancel
                       </button>
                     )}
+                    {booking.status === 'completed' && !myReview && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setReviewingBookingId(
+                            reviewingBookingId === booking.id ? null : booking.id
+                          )
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary"
+                      >
+                        <Star className="h-3.5 w-3.5" />
+                        Leave Review
+                      </button>
+                    )}
+                    {booking.status === 'completed' && myReview && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                        style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}
+                      >
+                        <Star className="h-3.5 w-3.5" style={{ fill: '#F59E0B' }} />
+                        Reviewed ({myReview.rating}/5)
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -242,6 +270,26 @@ export default function ArtisanBookingsPage() {
                     </span>
                   )}
                 </div>
+
+                {reviewingBookingId === booking.id && profile?.id && booking.customer_id && (
+                  <ReviewForm
+                    bookingId={booking.id}
+                    reviewerId={profile.id}
+                    revieweeId={booking.customer_id}
+                    revieweeName={customerName}
+                    onSubmitted={(review) => {
+                      setBookings((prev) =>
+                        prev.map((b) =>
+                          b.id === booking.id
+                            ? { ...b, reviews: [...(b.reviews ?? []), review] }
+                            : b
+                        )
+                      );
+                      setReviewingBookingId(null);
+                    }}
+                    onCancel={() => setReviewingBookingId(null)}
+                  />
+                )}
               </div>
             );
           })}

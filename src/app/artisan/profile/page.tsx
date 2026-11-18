@@ -1,13 +1,19 @@
 'use client';
 
 import { User, Mail, Phone, MapPin, Camera, Wrench, Star, LogOut, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { signOut } from '@/features/auth/services/auth-service';
 import { getArtisanProfile, updateArtisanProfile } from '@/features/artisans/services/artisan-service';
+import { VerificationBadge } from '@/features/artisans/components/verification-badge';
 import { updateProfile } from '@/features/profiles/services/profile-service';
+import { getReviewsForUser } from '@/features/reviews/services/review-service';
+import { ReviewsList } from '@/features/reviews/components/reviews-list';
+import type { Review } from '@/features/reviews/types';
 import { useState, useEffect } from 'react';
 
 export default function ArtisanProfilePage() {
+  const router = useRouter();
   const inputStyle = {
     background: 'var(--color-bg-secondary)',
     border: '1px solid var(--color-border)',
@@ -33,7 +39,9 @@ export default function ArtisanProfilePage() {
     serviceRadiusKm: '10',
     ratingAvg: 0,
     ratingCount: 0,
+    verifiedAt: null as string | null,
   });
+  const [reviews, setReviews] = useState<Array<Review & { job_title?: string | null }>>([]);
 
   // Pre‑populate form when profile loads
   useEffect(() => {
@@ -56,8 +64,13 @@ export default function ArtisanProfilePage() {
             serviceRadiusKm: data.service_radius_km != null ? String(data.service_radius_km) : '10',
             ratingAvg: Number(data.rating_avg ?? 0),
             ratingCount: Number(data.rating_count ?? 0),
+            verifiedAt: data.verified_at ?? null,
           });
         }
+      });
+
+      getReviewsForUser(profile.id).then(({ data }) => {
+        setReviews(data ?? []);
       });
     }
   }, [profile, prevProfileId]);
@@ -111,7 +124,12 @@ export default function ArtisanProfilePage() {
           </button>
         </div>
         <div>
-          <h2 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>{profile?.full_name || 'Your Name'}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>
+              {profile?.full_name || 'Your Name'}
+            </h2>
+            <VerificationBadge verified={Boolean(profile?.is_verified || professionalData.verifiedAt)} />
+          </div>
           <div className="flex items-center gap-2 mt-1">
             <Star className="h-4 w-4" style={{ color: '#F59E0B' }} />
             <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -291,7 +309,14 @@ export default function ArtisanProfilePage() {
         </button>
       </div>
 
-      <button className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-all" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: '#EF4444' }} onClick={async () => { await signOut(); window.location.href = '/login'; }}>
+      {/* Reviews */}
+      <ReviewsList
+        reviews={reviews}
+        emptyText="No reviews yet. Completed bookings can be reviewed by customers."
+        reviewerFallbackLabel="Customer"
+      />
+
+      <button className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-all" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: '#EF4444' }} onClick={async () => { await signOut(); router.push('/login'); router.refresh(); }}>
         <LogOut className="h-4 w-4" /> Sign Out
       </button>
     </div>

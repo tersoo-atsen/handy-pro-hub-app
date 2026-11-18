@@ -47,15 +47,6 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
             </NavLink>
           ))}
         </nav>
-        <div className="p-4" style={{ borderTop: '1px solid var(--color-border)' }}>
-          <div
-            className="rounded-md p-4 text-center text-sm"
-            style={{ background: 'var(--color-primary-50)' }}
-          >
-            <p className="font-medium" style={{ color: 'var(--color-primary)' }}>Pro Artisan</p>
-            <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>Verified Account</p>
-          </div>
-        </div>
       </aside>
 
       {/* Main */}
