@@ -26,3 +26,20 @@ export interface SearchResult {
     proficiency: number;
   }>;
 }
+
+export interface SkillItem {
+  id: string;
+  category_id: string;
+  name: string;
+  slug: string;
+}
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon_url: string | null;
+  is_active: boolean;
+  skills?: SkillItem[];
+}
