@@ -102,8 +102,10 @@ body {
 }
 
 /* ===== Utility classes ===== */
-.gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+.gradient-primary,
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary, #F97316) 0%, var(--color-primary-light, #FB923C) 100%);
+  color: var(--color-text-inverse, #FFFFFF);
 }
 
 .gradient-accent {

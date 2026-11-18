@@ -1,16 +1,12 @@
 import { findNearbyArtisans } from '@/features/artisans/services/artisan-service';
 import type { CategoryItem, SearchFilters, SearchResult } from '../types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:5000').trim();
 
 export async function searchArtisans(filters: SearchFilters): Promise<{
   data: SearchResult[] | null;
   error: Error | null;
 }> {
-  if (filters.latitude === undefined || filters.longitude === undefined) {
-    throw new Error('Location is required for search');
-  }
-
   const { data, error } = await findNearbyArtisans(
     filters.latitude,
     filters.longitude,
@@ -55,7 +51,9 @@ export async function searchArtisans(filters: SearchFilters): Promise<{
       (a, b) => Number(a.hourly_rate ?? Infinity) - Number(b.hourly_rate ?? Infinity)
     );
   } else {
-    results = [...results].sort((a, b) => Number(a.distance_km ?? 0) - Number(b.distance_km ?? 0));
+    results = [...results].sort(
+      (a, b) => Number(a.distance_km ?? Infinity) - Number(b.distance_km ?? Infinity)
+    );
   }
 
   return { data: results, error: null };
@@ -65,35 +63,49 @@ export async function searchCategories(query: string): Promise<{
   data: CategoryItem[] | null;
   error: Error | null;
 }> {
-  const params = new URLSearchParams({ q: query });
-  const response = await fetch(`${API_BASE}/categories/search?${params.toString()}`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+  try {
+    const params = new URLSearchParams({ q: query });
+    const response = await fetch(`${API_BASE}/categories/search?${params.toString()}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    return { data: null, error: new Error(err.message ?? 'Failed to search categories') };
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to search categories') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to search categories'),
+    };
   }
-
-  const data = await response.json();
-  return { data, error: null };
 }
 
 export async function getAllCategories(): Promise<{
   data: CategoryItem[] | null;
   error: Error | null;
 }> {
-  const response = await fetch(`${API_BASE}/categories`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+  try {
+    const response = await fetch(`${API_BASE}/categories`, {
+      method: 'GET',
+      credentials: 'include',
+    });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    return { data: null, error: new Error(err.message ?? 'Failed to fetch categories') };
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to fetch categories') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to fetch categories'),
+    };
   }
-
-  const data = await response.json();
-  return { data, error: null };
 }

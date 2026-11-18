@@ -23,7 +23,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         <div className="h-16 flex items-center px-6">
           <Link href="/artisan/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">H</span>
+              <span className="font-bold text-sm">H</span>
             </div>
             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
               Handy<span className="text-gradient">Pro</span>
@@ -65,7 +65,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         >
           <Link href="/artisan/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">H</span>
+              <span className="font-bold text-sm">H</span>
             </div>
             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
               Handy<span className="text-gradient">Pro</span>

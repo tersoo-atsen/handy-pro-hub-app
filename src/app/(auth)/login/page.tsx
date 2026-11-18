@@ -38,12 +38,12 @@ export default function LoginPage() {
         <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
         <div className="relative z-10 text-center">
           <div className="h-16 w-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6">
-            <span className="text-white font-bold text-2xl">H</span>
+            <span className="font-bold text-2xl">H</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
+          <h1 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
             Welcome Back
           </h1>
-          <p className="text-white/70 text-lg max-w-md">
+          <p className="text-lg max-w-md">
             Sign in to manage your jobs, track artisans, and get things done.
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8 text-center">
             <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-lg">H</span>
+              <span className="font-bold text-lg">H</span>
             </div>
             <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
               Handy<span className="text-gradient">Pro</span>

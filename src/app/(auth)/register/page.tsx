@@ -67,12 +67,12 @@ export default function RegisterPage() {
         <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
         <div className="relative z-10 text-center">
           <div className="h-16 w-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-6">
-            <span className="text-white font-bold text-2xl">H</span>
+            <span className="font-bold text-2xl">H</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
+          <h1 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
             Join Handy Pro
           </h1>
-          <p className="text-white/70 text-lg max-w-md">
+          <p className="text-lg max-w-md">
             Create an account to find skilled artisans near you and get your jobs done.
           </p>
         </div>

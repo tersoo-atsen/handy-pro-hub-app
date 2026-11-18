@@ -55,7 +55,7 @@ export default function LandingPage() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">H</span>
+                <span className="font-bold text-sm">H</span>
               </div>
               <span className="text-xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
                 Handy<span className="text-gradient">Pro</span>
@@ -273,12 +273,12 @@ export default function LandingPage() {
             />
             <div className="relative z-10">
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6"
-                style={{ fontFamily: 'var(--font-outfit)' }}
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6"
+                style={{ fontFamily: 'var(--font-outfit)', color: 'var(--color-text)' }}
               >
                 Ready to Get Started?
               </h2>
-              <p className="text-lg text-white/80 max-w-2xl mx-auto mb-10">
+              <p className="text-lg max-w-2xl mx-auto mb-10" style={{ color: 'var(--color-text)' }}>
                 Join thousands of customers and artisans already using Handy Pro.
                 Your next trusted professional is just a tap away.
               </p>
@@ -286,15 +286,15 @@ export default function LandingPage() {
                 <Link
                   href="/register"
                   className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:scale-105"
-                  style={{ background: 'white', color: 'var(--color-primary-dark)' }}
+                  style={{ background: 'var(--color-surface)', color: 'var(--color-primary-dark)' }}
                 >
                   Find an Artisan
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <Link
                   href="/register/artisan"
-                  className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105"
-                  style={{ border: '2px solid rgba(255,255,255,0.3)' }}
+                  className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:scale-105"
+                  style={{ border: '2px solid var(--color-text)', color: 'var(--color-text)' }}
                 >
                   Become a Pro
                 </Link>
@@ -310,7 +310,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">H</span>
+                <span className="font-bold text-sm">H</span>
               </div>
               <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
                 Handy<span className="text-gradient">Pro</span>

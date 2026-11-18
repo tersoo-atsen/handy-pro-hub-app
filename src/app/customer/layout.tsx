@@ -21,7 +21,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       >
         <Link href="/customer/dashboard" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-            <span className="text-white font-bold text-sm">H</span>
+            <span className="font-bold text-sm">H</span>
           </div>
           <span className="text-lg font-bold hidden sm:inline" style={{ fontFamily: 'var(--font-outfit)' }}>
             Handy<span className="text-gradient">Pro</span>

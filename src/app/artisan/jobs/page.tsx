@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Clock, DollarSign, Briefcase, Loader2 } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Briefcase, Gavel, Loader2 } from 'lucide-react';
+import { useUser } from '@/hooks/use-user';
 import { useGeolocation } from '@/hooks/use-geolocation';
 import { getAllCategories } from '@/features/search/services/search-service';
 import { findNearbyJobs } from '@/features/jobs/services/job-service';
+import { createBid } from '@/features/bidding/services/bid-service';
 import type { CategoryItem } from '@/features/search/types';
 import type { JobRequest } from '@/features/jobs/types';
 
@@ -24,10 +26,18 @@ const urgencyStyles: Record<string, { bg: string; color: string }> = {
 };
 
 export default function ArtisanJobsPage() {
+  const { profile } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>(fallbackCategories);
   const [jobs, setJobs] = useState<JobRequest[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+
+  const [biddingJobId, setBiddingJobId] = useState<string | null>(null);
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidHours, setBidHours] = useState('');
+  const [bidMessage, setBidMessage] = useState('');
+  const [submittingBid, setSubmittingBid] = useState(false);
+  const [bidFeedback, setBidFeedback] = useState<{ jobId: string; type: 'success' | 'error'; text: string } | null>(null);
 
   const { latitude, longitude, isLoading: geoLoading, refresh: refreshLocation } = useGeolocation();
 
@@ -58,6 +68,42 @@ export default function ArtisanJobsPage() {
       });
   }, [latitude, longitude, selectedCategory]);
 
+  const handleOpenBidForm = (jobId: string) => {
+    setBiddingJobId(biddingJobId === jobId ? null : jobId);
+    setBidAmount('');
+    setBidHours('');
+    setBidMessage('');
+    setBidFeedback(null);
+  };
+
+  const handleSubmitBid = async (e: React.FormEvent, jobId: string) => {
+    e.preventDefault();
+    if (!profile?.id) return;
+    setSubmittingBid(true);
+    setBidFeedback(null);
+
+    const { error } = await createBid({
+      job_id: jobId,
+      artisan_id: profile.id,
+      amount: Number(bidAmount),
+      message: bidMessage,
+      estimated_hours: bidHours ? Number(bidHours) : undefined,
+    });
+
+    setSubmittingBid(false);
+    if (error) {
+      setBidFeedback({ jobId, type: 'error', text: error.message });
+    } else {
+      setBidFeedback({ jobId, type: 'success', text: 'Bid submitted successfully!' });
+      setJobs((prev) =>
+        prev.map((j) =>
+          j.id === jobId ? { ...j, bid_count: (j.bid_count ?? 0) + 1 } : j
+        )
+      );
+      setBiddingJobId(null);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -85,9 +131,9 @@ export default function ArtisanJobsPage() {
           onClick={() => setSelectedCategory('all')}
           className="rounded-full px-4 py-2 text-sm font-medium transition-all"
           style={{
-            background: selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-surface)',
+            background: selectedCategory === 'all' ? 'var(--color-primary-50)' : 'var(--color-surface)',
             border: `1px solid ${selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-            color: selectedCategory === 'all' ? 'white' : 'var(--color-text-secondary)',
+            color: selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
           }}
         >
           All
@@ -99,9 +145,9 @@ export default function ArtisanJobsPage() {
             onClick={() => setSelectedCategory(cat.slug)}
             className="rounded-full px-4 py-2 text-sm font-medium transition-all"
             style={{
-              background: selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-surface)',
+              background: selectedCategory === cat.slug ? 'var(--color-primary-50)' : 'var(--color-surface)',
               border: `1px solid ${selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-border)'}`,
-              color: selectedCategory === cat.slug ? 'white' : 'var(--color-text-secondary)',
+              color: selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-text-secondary)',
             }}
           >
             {cat.name}
@@ -137,10 +183,11 @@ export default function ArtisanJobsPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {jobs.map((job) => {
             const urgencyStyle = urgencyStyles[job.urgency] ?? urgencyStyles.normal;
+            const isOpenForm = biddingJobId === job.id;
             return (
               <div
                 key={job.id}
-                className="rounded-2xl p-6 space-y-4 transition-all hover:scale-[1.01]"
+                className="rounded-2xl p-6 space-y-4 transition-all"
                 style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -165,6 +212,15 @@ export default function ArtisanJobsPage() {
                       {job.title}
                     </h3>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenBidForm(job.id)}
+                    className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary"
+                  >
+                    <Gavel className="h-3.5 w-3.5" />
+                    {isOpenForm ? 'Cancel' : 'Place Bid'}
+                  </button>
                 </div>
 
                 <p className="text-sm line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
@@ -197,6 +253,73 @@ export default function ArtisanJobsPage() {
                     </span>
                   )}
                 </div>
+
+                {bidFeedback && bidFeedback.jobId === job.id && (
+                  <div
+                    className="rounded-lg px-3 py-2 text-xs font-medium"
+                    style={{
+                      background: bidFeedback.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                      color: bidFeedback.type === 'success' ? '#10B981' : '#EF4444',
+                    }}
+                  >
+                    {bidFeedback.text}
+                  </div>
+                )}
+
+                {isOpenForm && (
+                  <form
+                    onSubmit={(e) => handleSubmitBid(e, job.id)}
+                    className="space-y-3 pt-3"
+                    style={{ borderTop: '1px solid var(--color-border-light)' }}
+                  >
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1">Bid Amount (₦)</label>
+                        <input
+                          type="number"
+                          required
+                          min={0}
+                          value={bidAmount}
+                          onChange={(e) => setBidAmount(e.target.value)}
+                          placeholder="15000"
+                          className="w-full rounded-xl px-3 py-2 text-sm outline-none"
+                          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1">Est. Hours</label>
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.5"
+                          value={bidHours}
+                          onChange={(e) => setBidHours(e.target.value)}
+                          placeholder="2"
+                          className="w-full rounded-xl px-3 py-2 text-sm outline-none"
+                          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Proposal Message</label>
+                      <textarea
+                        rows={2}
+                        value={bidMessage}
+                        onChange={(e) => setBidMessage(e.target.value)}
+                        placeholder="Describe your approach and availability..."
+                        className="w-full rounded-xl px-3 py-2 text-sm outline-none resize-none"
+                        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={submittingBid}
+                      className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
+                    >
+                      {submittingBid ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit Bid'}
+                    </button>
+                  </form>
+                )}
               </div>
             );
           })}
