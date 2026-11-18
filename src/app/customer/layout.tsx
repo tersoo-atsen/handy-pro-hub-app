@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Home, Briefcase, Calendar, MessageSquare, User, Search } from 'lucide-react';
+import { NavLink } from '@/components/nav-link';
 
 const customerNav = [
   { label: 'Dashboard', href: '/customer/dashboard', icon: Home },
@@ -29,15 +30,17 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         <div className="flex-1" />
         <nav className="hidden md:flex items-center gap-1">
           {customerNav.map((item) => (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
               style={{ color: 'var(--color-text-secondary)' }}
+              activeStyle={{ backgroundColor: 'var(--color-primary-50)' }}
+              activeClassName="font-semibold"
             >
               <item.icon className="h-4 w-4" />
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
       </header>
@@ -53,15 +56,16 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)', boxShadow: 'var(--shadow-lg)' }}
       >
         {customerNav.slice(0, 5).map((item) => (
-          <Link
+          <NavLink
             key={item.href}
             href={item.href}
             className="flex flex-col items-center gap-1 px-3 py-1 text-xs"
             style={{ color: 'var(--color-text-secondary)' }}
+            activeClassName="font-semibold"
           >
             <item.icon className="h-5 w-5" />
             {item.label}
-          </Link>
+          </NavLink>
         ))}
       </nav>
     </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LayoutDashboard, Users, Briefcase, AlertTriangle } from 'lucide-react';
+import { NavLink } from '@/components/nav-link';
 
 const adminNav = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -25,15 +26,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {adminNav.map((item) => (
-            <Link
+            <NavLink
               key={item.href}
               href={item.href}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-[var(--color-surface-hover)]"
               style={{ color: 'var(--color-text-secondary)' }}
+              activeStyle={{ backgroundColor: 'var(--color-primary-50)' }}
+              activeClassName="font-semibold"
             >
               <item.icon className="h-5 w-5" />
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
       </aside>

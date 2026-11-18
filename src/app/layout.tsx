@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import { SupabaseProvider } from '@/providers/supabase-provider';
 import { AuthProvider } from '@/providers/auth-provider';
-import { ThemeProvider } from '@/providers/theme-provider';
 import './globals.css';
 
 const inter = Inter({
@@ -45,14 +44,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      suppressHydrationWarning
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col" style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}>
         <SupabaseProvider>
-          <AuthProvider>
-            <ThemeProvider>{children}</ThemeProvider>
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </SupabaseProvider>
       </body>
     </html>
