@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, MapPin, Star, Wrench, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, MapPin, Star, Wrench, MessageSquare, Loader2 } from 'lucide-react';
+import { useUser } from '@/hooks/use-user';
 import { useGeolocation } from '@/hooks/use-geolocation';
 import { getAllCategories, searchArtisans } from '@/features/search/services/search-service';
+import { getOrCreateConversation } from '@/features/messaging/services/message-service';
 import type { CategoryItem, SearchResult } from '@/features/search/types';
 
 const fallbackCategories: Array<{ name: string; slug: string }> = [
@@ -18,13 +21,31 @@ const fallbackCategories: Array<{ name: string; slug: string }> = [
 ];
 
 export default function SearchPage() {
+  const router = useRouter();
+  const { profile } = useUser();
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>(fallbackCategories);
   const [artisans, setArtisans] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(true);
+  const [messagingUserId, setMessagingUserId] = useState<string | null>(null);
 
   const { latitude, longitude, isLoading: geoLoading, refresh: refreshLocation } = useGeolocation();
+
+  const handleMessageArtisan = async (artisanUserId: string) => {
+    if (!profile?.id) return;
+    setMessagingUserId(artisanUserId);
+    const { data } = await getOrCreateConversation({
+      participant_1: profile.id,
+      participant_2: artisanUserId,
+    });
+    setMessagingUserId(null);
+    if (data?.id) {
+      router.push(`/customer/messages?conversationId=${encodeURIComponent(data.id)}`);
+    } else {
+      router.push('/customer/messages');
+    }
+  };
 
   useEffect(() => {
     getAllCategories().then(({ data }) => {
@@ -192,6 +213,20 @@ export default function SearchPage() {
                   ))}
                 </div>
               )}
+
+              <button
+                type="button"
+                disabled={messagingUserId === artisan.user_id || artisan.user_id === profile?.id}
+                onClick={() => handleMessageArtisan(artisan.user_id)}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+              >
+                {messagingUserId === artisan.user_id ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <MessageSquare className="h-3.5 w-3.5" />
+                )}
+                Message Artisan
+              </button>
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LayoutDashboard, MapPin, Gavel, Calendar, MessageSquare, User, Clock } from 'lucide-react';
+import { NotificationBell } from '@/features/notifications/components/notification-bell';
 import { NavLink } from '@/components/nav-link';
 
 const artisanNav = [
@@ -20,7 +21,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
         className="hidden lg:flex flex-col w-64 fixed inset-y-0 left-0 z-30"
         style={{ background: 'var(--color-surface)', borderRight: '1px solid var(--color-border)' }}
       >
-        <div className="h-16 flex items-center px-6">
+        <div className="h-16 flex items-center justify-between px-6">
           <Link href="/artisan/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
               <span className="font-bold text-sm">H</span>
@@ -29,6 +30,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
               Handy<span className="text-gradient">Pro</span>
             </span>
           </Link>
+          <NotificationBell align="left" />
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {artisanNav.map((item) => (
@@ -60,7 +62,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
       <div className="flex-1 lg:ml-64">
         {/* Top bar on mobile */}
         <header
-          className="lg:hidden sticky top-0 z-40 h-16 flex items-center px-4"
+          className="lg:hidden sticky top-0 z-40 h-16 flex items-center justify-between px-4"
           style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
         >
           <Link href="/artisan/dashboard" className="flex items-center gap-2">
@@ -71,6 +73,7 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
               Handy<span className="text-gradient">Pro</span>
             </span>
           </Link>
+          <NotificationBell />
         </header>
 
         <main className="p-6 lg:p-8 max-w-6xl">

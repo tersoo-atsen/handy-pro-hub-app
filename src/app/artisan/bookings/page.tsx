@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, DollarSign, User, Play, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Calendar, Clock, DollarSign, User, Play, CheckCircle, XCircle, MessageSquare, Loader2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { getMyBookings, updateBookingStatus } from '@/features/bookings/services/booking-service';
+import { getOrCreateConversation } from '@/features/messaging/services/message-service';
 
 const statusBadgeStyles: Record<string, { bg: string; color: string }> = {
   pending: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B' },
@@ -14,11 +16,29 @@ const statusBadgeStyles: Record<string, { bg: string; color: string }> = {
 };
 
 export default function ArtisanBookingsPage() {
+  const router = useRouter();
   const { profile, isLoading: userLoading } = useUser();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Upcoming');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [messagingBookingId, setMessagingBookingId] = useState<string | null>(null);
+
+  const handleMessageCustomer = async (booking: any) => {
+    if (!profile?.id || !booking.customer_id) return;
+    setMessagingBookingId(booking.id);
+    const { data } = await getOrCreateConversation({
+      participant_1: profile.id,
+      participant_2: booking.customer_id,
+      job_id: booking.job_id,
+    });
+    setMessagingBookingId(null);
+    if (data?.id) {
+      router.push(`/artisan/messages?conversationId=${encodeURIComponent(data.id)}`);
+    } else {
+      router.push('/artisan/messages');
+    }
+  };
 
   useEffect(() => {
     if (!profile?.id) {
@@ -143,6 +163,20 @@ export default function ArtisanBookingsPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={messagingBookingId === booking.id}
+                      onClick={() => handleMessageCustomer(booking)}
+                      className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all disabled:opacity-60"
+                      style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                    >
+                      {messagingBookingId === booking.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <MessageSquare className="h-3.5 w-3.5" />
+                      )}
+                      Message
+                    </button>
                     {(booking.status === 'pending' || booking.status === 'confirmed') && (
                       <button
                         type="button"
