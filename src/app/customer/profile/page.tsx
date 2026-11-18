@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   User,
   Mail,
@@ -14,12 +15,17 @@ import { useUser } from '@/hooks/use-user';
 import { signOut } from '@/features/auth/services/auth-service';
 import { upgradeToArtisan } from '@/features/artisans/services/artisan-service';
 import { updateProfile } from '@/features/profiles/services/profile-service';
+import { getReviewsForUser } from '@/features/reviews/services/review-service';
+import { ReviewsList } from '@/features/reviews/components/reviews-list';
+import type { Review } from '@/features/reviews/types';
 
 export default function CustomerProfilePage() {
+  const router = useRouter();
   const { profile, isLoading } = useUser();
 
   const [saving, setSaving] = useState(false);
   const [prevProfileId, setPrevProfileId] = useState(profile?.id);
+  const [reviews, setReviews] = useState<Array<Review & { job_title?: string | null }>>([]);
   const [formData, setFormData] = useState({
     fullName: profile?.full_name || '',
     phone: profile?.phone || '',
@@ -27,6 +33,13 @@ export default function CustomerProfilePage() {
     city: profile?.city || '',
     state: profile?.state || '',
   });
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    getReviewsForUser(profile.id).then(({ data }) => {
+      setReviews(data ?? []);
+    });
+  }, [profile?.id]);
 
   // Prepopulate form once profile data arrives from Supabase
   if (profile && profile.id !== prevProfileId) {
@@ -75,7 +88,8 @@ export default function CustomerProfilePage() {
             setSaving(true);
             const { error } = await upgradeToArtisan(profile.id);
             if (!error) {
-              window.location.href = '/artisan/dashboard';
+              router.push('/artisan/dashboard');
+              router.refresh();
             }
             setSaving(false);
           }}
@@ -270,11 +284,19 @@ export default function CustomerProfilePage() {
         </button>
       </div>
 
+      {/* Reviews */}
+      <ReviewsList
+        reviews={reviews}
+        emptyText="No reviews yet. Completed bookings can be reviewed by artisans."
+        reviewerFallbackLabel="Artisan"
+      />
+
       {/* Sign out */}
       <button
         onClick={async () => {
           await signOut();
-          window.location.href = '/login';
+          router.push('/login');
+          router.refresh();
         }}
         className="w-full flex items-center justify-center gap-2 rounded-md py-3 text-sm font-medium transition-all"
         style={{

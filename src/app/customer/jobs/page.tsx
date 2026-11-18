@@ -8,6 +8,7 @@ import { useUser } from '@/hooks/use-user';
 import { getMyJobs } from '@/features/jobs/services/job-service';
 import { getBidsForJob, acceptBid } from '@/features/bidding/services/bid-service';
 import { getOrCreateConversation } from '@/features/messaging/services/message-service';
+import { VerificationBadge } from '@/features/artisans/components/verification-badge';
 import type { JobRequest } from '@/features/jobs/types';
 
 export default function CustomerJobsPage() {
@@ -249,10 +250,16 @@ export default function CustomerJobsPage() {
                             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)' }}
                           >
                             <div className="space-y-1">
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-semibold">
                                   {bid.artisan_profiles?.profiles?.full_name ?? 'Artisan'}
                                 </span>
+                                <VerificationBadge
+                                  verified={Boolean(
+                                    bid.artisan_profiles?.profiles?.is_verified ||
+                                      bid.artisan_profiles?.verified_at
+                                  )}
+                                />
                                 <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
                                   ₦{Number(bid.amount ?? 0).toLocaleString()}
                                 </span>

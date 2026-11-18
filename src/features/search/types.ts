@@ -15,6 +15,7 @@ export interface SearchResult {
   full_name: string;
   avatar_url: string | null;
   bio: string | null;
+  is_verified?: boolean;
   rating_avg: number;
   rating_count: number;
   hourly_rate: number | null;

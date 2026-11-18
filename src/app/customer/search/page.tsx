@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/use-user';
 import { useGeolocation } from '@/hooks/use-geolocation';
 import { getAllCategories, searchArtisans } from '@/features/search/services/search-service';
 import { getOrCreateConversation } from '@/features/messaging/services/message-service';
+import { VerificationBadge } from '@/features/artisans/components/verification-badge';
 import type { CategoryItem, SearchResult } from '@/features/search/types';
 
 const fallbackCategories: Array<{ name: string; slug: string }> = [
@@ -172,7 +173,10 @@ export default function SearchPage() {
                     <Wrench className="h-6 w-6" style={{ color: 'var(--color-primary)' }} />
                   </div>
                   <div>
-                    <h3 className="font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>{artisan.full_name}</h3>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>{artisan.full_name}</h3>
+                      <VerificationBadge verified={artisan.is_verified} />
+                    </div>
                     <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
                       <span className="inline-flex items-center gap-1">
                         <Star className="h-3.5 w-3.5" style={{ color: '#F59E0B' }} />
