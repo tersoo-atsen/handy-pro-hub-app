@@ -31,16 +31,40 @@ export function useUser() {
       return;
     }
 
+    let cancelled = false;
+
     async function fetchProfile() {
       const { data, error } = await getProfileById(user!.id);
 
+      if (cancelled) return;
+
       if (!error && data) {
         setProfile(data as UserProfile);
+      } else {
+        const anyUser = user as any;
+        setProfile({
+          id: user!.id,
+          role: anyUser.role ?? 'customer',
+          full_name: anyUser.full_name ?? user!.email?.split('@')[0] ?? 'User',
+          email: user!.email ?? '',
+          phone: null,
+          avatar_url: null,
+          address: null,
+          city: null,
+          state: null,
+          country: 'Nigeria',
+          is_verified: false,
+          is_active: true,
+        });
       }
       setIsLoading(false);
     }
 
     fetchProfile();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   return { profile, isLoading };

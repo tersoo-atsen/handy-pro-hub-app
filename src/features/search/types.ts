@@ -1,8 +1,8 @@
 export interface SearchFilters {
   query?: string;
   category?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   radiusKm?: number;
   minRating?: number;
   maxRate?: number;
@@ -18,7 +18,7 @@ export interface SearchResult {
   rating_avg: number;
   rating_count: number;
   hourly_rate: number | null;
-  distance_km: number;
+  distance_km: number | null;
   skills: Array<{
     skill_id: string;
     skill_name: string;

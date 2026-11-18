@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Briefcase, Plus, MapPin, DollarSign, Clock, Loader2 } from 'lucide-react';
+import { Briefcase, Plus, MapPin, DollarSign, Clock, Gavel, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 import { getMyJobs } from '@/features/jobs/services/job-service';
+import { getBidsForJob, acceptBid } from '@/features/bidding/services/bid-service';
 import type { JobRequest } from '@/features/jobs/types';
 
 export default function CustomerJobsPage() {
@@ -12,6 +13,11 @@ export default function CustomerJobsPage() {
   const [jobs, setJobs] = useState<JobRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
+
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+  const [jobBids, setJobBids] = useState<Record<string, any[]>>({});
+  const [loadingBidsJobId, setLoadingBidsJobId] = useState<string | null>(null);
+  const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile?.id) {
@@ -27,6 +33,37 @@ export default function CustomerJobsPage() {
         setLoading(false);
       });
   }, [profile?.id, userLoading]);
+
+  const handleToggleBids = async (jobId: string) => {
+    if (expandedJobId === jobId) {
+      setExpandedJobId(null);
+      return;
+    }
+    setExpandedJobId(jobId);
+    setLoadingBidsJobId(jobId);
+    const { data } = await getBidsForJob(jobId);
+    setJobBids((prev) => ({ ...prev, [jobId]: data ?? [] }));
+    setLoadingBidsJobId(null);
+  };
+
+  const handleAcceptBid = async (jobId: string, bidId: string) => {
+    if (!profile?.id) return;
+    setAcceptingBidId(bidId);
+    const { error } = await acceptBid(bidId, profile.id);
+    if (!error) {
+      setJobs((prev) =>
+        prev.map((j) => (j.id === jobId ? { ...j, status: 'assigned' } : j))
+      );
+      setJobBids((prev) => ({
+        ...prev,
+        [jobId]: (prev[jobId] ?? []).map((b) => ({
+          ...b,
+          status: b.id === bidId ? 'accepted' : b.status === 'pending' ? 'rejected' : b.status,
+        })),
+      }));
+    }
+    setAcceptingBidId(null);
+  };
 
   const filteredJobs = jobs.filter((job) => {
     if (activeTab === 'All') return true;
@@ -102,61 +139,142 @@ export default function CustomerJobsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredJobs.map((job: any) => (
-            <div
-              key={job.id}
-              className="rounded-2xl p-6 space-y-3"
-              style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    {(job.categories?.name || job.category_name) && (
+          {filteredJobs.map((job: any) => {
+            const isExpanded = expandedJobId === job.id;
+            const bidsForJob = jobBids[job.id] ?? [];
+            return (
+              <div
+                key={job.id}
+                className="rounded-2xl p-6 space-y-3"
+                style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      {(job.categories?.name || job.category_name) && (
+                        <span
+                          className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                        >
+                          {job.categories?.name ?? job.category_name}
+                        </span>
+                      )}
                       <span
-                        className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                        style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                        className="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                        style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}
                       >
-                        {job.categories?.name ?? job.category_name}
+                        {job.status}
                       </span>
-                    )}
-                    <span
-                      className="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
-                      style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}
-                    >
-                      {job.status}
-                    </span>
+                    </div>
+                    <h3 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>
+                      {job.title}
+                    </h3>
                   </div>
-                  <h3 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>
-                    {job.title}
-                  </h3>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleBids(job.id)}
+                    className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all"
+                    style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                  >
+                    <Gavel className="h-3.5 w-3.5" />
+                    {isExpanded ? 'Hide Bids' : `View Bids (${job.bid_count ?? 0})`}
+                  </button>
                 </div>
+
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  {job.description}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  {(job.budget_min != null || job.budget_max != null) && (
+                    <span className="inline-flex items-center gap-1 font-medium" style={{ color: 'var(--color-text)' }}>
+                      <DollarSign className="h-3.5 w-3.5" style={{ color: 'var(--color-accent)' }} />
+                      ₦{Number(job.budget_min ?? 0).toLocaleString()}
+                      {job.budget_max != null ? ` – ₦${Number(job.budget_max).toLocaleString()}` : ''}
+                    </span>
+                  )}
+                  {job.address && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {job.address}
+                    </span>
+                  )}
+                  {job.created_at && (
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {new Date(job.created_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+
+                {isExpanded && (
+                  <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--color-border-light)' }}>
+                    <h4 className="text-sm font-semibold">Submitted Bids</h4>
+                    {loadingBidsJobId === job.id ? (
+                      <div className="py-4 text-center">
+                        <Loader2 className="h-5 w-5 animate-spin mx-auto" style={{ color: 'var(--color-primary)' }} />
+                      </div>
+                    ) : bidsForJob.length === 0 ? (
+                      <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                        No bids placed on this job yet.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {bidsForJob.map((bid) => (
+                          <div
+                            key={bid.id}
+                            className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-light)' }}
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold">
+                                  {bid.artisan_profiles?.profiles?.full_name ?? 'Artisan'}
+                                </span>
+                                <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
+                                  ₦{Number(bid.amount ?? 0).toLocaleString()}
+                                </span>
+                                {bid.estimated_hours != null && (
+                                  <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                                    · {Number(bid.estimated_hours)} hrs
+                                  </span>
+                                )}
+                                <span className="text-xs capitalize" style={{ color: 'var(--color-text-secondary)' }}>
+                                  · {bid.status}
+                                </span>
+                              </div>
+                              {bid.message && (
+                                <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                                  {bid.message}
+                                </p>
+                              )}
+                            </div>
+
+                            {bid.status === 'pending' && (
+                              <button
+                                type="button"
+                                disabled={acceptingBidId === bid.id}
+                                onClick={() => handleAcceptBid(job.id, bid.id)}
+                                className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                              >
+                                {acceptingBidId === bid.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="h-3.5 w-3.5" />
+                                )}
+                                Accept Bid
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                {job.description}
-              </p>
-              <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                {(job.budget_min != null || job.budget_max != null) && (
-                  <span className="inline-flex items-center gap-1 font-medium" style={{ color: 'var(--color-text)' }}>
-                    <DollarSign className="h-3.5 w-3.5" style={{ color: 'var(--color-accent)' }} />
-                    ₦{Number(job.budget_min ?? 0).toLocaleString()}
-                    {job.budget_max != null ? ` – ₦${Number(job.budget_max).toLocaleString()}` : ''}
-                  </span>
-                )}
-                {job.address && (
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {job.address}
-                  </span>
-                )}
-                {job.created_at && (
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" />
-                    {new Date(job.created_at).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

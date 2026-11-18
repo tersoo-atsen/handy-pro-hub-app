@@ -22,7 +22,7 @@ export default function SearchPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>(fallbackCategories);
   const [artisans, setArtisans] = useState<SearchResult[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [searching, setSearching] = useState(true);
 
   const { latitude, longitude, isLoading: geoLoading, refresh: refreshLocation } = useGeolocation();
 
@@ -35,7 +35,6 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
-    if (latitude === null || longitude === null) return;
     setSearching(true);
     searchArtisans({
       latitude,
@@ -56,9 +55,22 @@ export default function SearchPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Find Artisans</h1>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Search for skilled professionals near you</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Find Artisans</h1>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Search for skilled professionals near you</p>
+        </div>
+        {(latitude === null || longitude === null) && (
+          <button
+            type="button"
+            onClick={refreshLocation}
+            disabled={geoLoading}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
+          >
+            {geoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+            Enable Location
+          </button>
+        )}
       </div>
 
       {/* Search bar */}
@@ -81,8 +93,8 @@ export default function SearchPage() {
           onClick={() => setSelectedCategory('all')}
           className="rounded-full px-4 py-2 text-sm font-medium transition-all"
           style={{
-            background: selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-surface)',
-            color: selectedCategory === 'all' ? 'white' : 'var(--color-text-secondary)',
+            background: selectedCategory === 'all' ? 'var(--color-primary-50)' : 'var(--color-surface)',
+            color: selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
             border: `1px solid ${selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-border)'}`,
           }}
         >
@@ -95,8 +107,8 @@ export default function SearchPage() {
             onClick={() => setSelectedCategory(cat.slug)}
             className="rounded-full px-4 py-2 text-sm font-medium transition-all"
             style={{
-              background: selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-surface)',
-              color: selectedCategory === cat.slug ? 'white' : 'var(--color-text-secondary)',
+              background: selectedCategory === cat.slug ? 'var(--color-primary-50)' : 'var(--color-surface)',
+              color: selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               border: `1px solid ${selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-border)'}`,
             }}
           >
@@ -106,33 +118,13 @@ export default function SearchPage() {
       </div>
 
       {/* Results / Empty states */}
-      {latitude === null || longitude === null ? (
-        <div
-          className="rounded-2xl p-12 text-center"
-          style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
-        >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'var(--color-primary-50)' }}>
-            <MapPin className="h-8 w-8" style={{ color: 'var(--color-primary)' }} />
-          </div>
-          <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>Enable Location</h3>
-          <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>Allow location access to find artisans near you</p>
-          <button
-            type="button"
-            onClick={refreshLocation}
-            disabled={geoLoading}
-            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white gradient-primary disabled:opacity-60"
-          >
-            {geoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-            Enable Location
-          </button>
-        </div>
-      ) : searching ? (
+      {searching ? (
         <div
           className="rounded-2xl p-12 text-center"
           style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
         >
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" style={{ color: 'var(--color-primary)' }} />
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Searching nearby artisans...</p>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Searching artisans...</p>
         </div>
       ) : artisans.length === 0 ? (
         <div
@@ -142,7 +134,7 @@ export default function SearchPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'var(--color-primary-50)' }}>
             <Wrench className="h-8 w-8" style={{ color: 'var(--color-primary)' }} />
           </div>
-          <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>No artisans found nearby</h3>
+          <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>No artisans found</h3>
           <p style={{ color: 'var(--color-text-secondary)' }}>Try selecting a different category or broadening your search</p>
         </div>
       ) : (
@@ -165,8 +157,12 @@ export default function SearchPage() {
                         <Star className="h-3.5 w-3.5" style={{ color: '#F59E0B' }} />
                         {Number(artisan.rating_avg ?? 0).toFixed(1)} ({artisan.rating_count ?? 0})
                       </span>
-                      <span>·</span>
-                      <span>{artisan.distance_km} km away</span>
+                      {artisan.distance_km != null && (
+                        <>
+                          <span>·</span>
+                          <span>{artisan.distance_km} km away</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

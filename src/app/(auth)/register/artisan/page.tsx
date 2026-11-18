@@ -8,7 +8,7 @@ export default function ArtisanRegisterPage() {
     <div className="min-h-screen flex items-center justify-center p-8" style={{ background: 'var(--color-bg)' }}>
       <div className="w-full max-w-lg text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-6">
-          <Wrench className="h-8 w-8 text-white" />
+          <Wrench className="h-8 w-8" />
         </div>
         <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
           Join as a <span className="text-gradient">Pro Artisan</span>

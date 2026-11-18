@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="h-16 flex items-center px-6">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-red-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+              <span className="font-bold text-sm" style={{ color: 'var(--color-text-inverse)' }}>A</span>
             </div>
             <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Admin Panel</span>
           </Link>

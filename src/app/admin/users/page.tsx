@@ -61,9 +61,9 @@ export default function AdminUsersPage() {
               onClick={() => setActiveFilter(filter)}
               className="rounded-lg px-4 py-2 text-sm font-medium transition-all"
               style={{
-                background: activeFilter === filter ? 'var(--color-primary)' : 'var(--color-surface)',
+                background: activeFilter === filter ? 'var(--color-primary-50)' : 'var(--color-surface)',
                 border: `1px solid ${activeFilter === filter ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                color: activeFilter === filter ? '#fff' : 'var(--color-text-secondary)',
+                color: activeFilter === filter ? 'var(--color-primary)' : 'var(--color-text-secondary)',
               }}
             >
               {filter}

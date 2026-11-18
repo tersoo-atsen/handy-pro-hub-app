@@ -2,7 +2,7 @@
 import type { LoginCredentials, RegisterData } from '../types';
 
 // Base URL for the backend API – configure via environment variable.
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:5000').trim();
 
 function persistAuthSession(data: { access_token?: string; user?: any }) {
   if (typeof window === 'undefined') return;

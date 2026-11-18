@@ -36,13 +36,24 @@ export default function CustomerDashboard() {
 
       {/* Upgrade banner */}
       {profile && profile.role !== 'artisan' && (
-        <div className="rounded-2xl p-6 mb-6 bg-gradient-primary text-white shadow-md">
-          <h2 className="text-lg font-semibold">Become a Pro Artisan</h2>
-          <p className="mt-2">Unlock job bidding, set rates, and grow your business.</p>
+        <div
+          className="rounded-2xl p-6 mb-6"
+          style={{
+            background: 'var(--color-surface)',
+            boxShadow: 'var(--shadow-md)',
+            border: '1px solid var(--color-border-light)',
+          }}
+        >
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
+            Become a Pro Artisan
+          </h2>
+          <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            Unlock job bidding, set rates, and grow your business.
+          </p>
           <button
             onClick={handleUpgrade}
             disabled={upgrading}
-            className="mt-4 w-full rounded-xl py-2 font-semibold text-white gradient-primary hover:scale-105 transition-transform flex items-center justify-center"
+            className="mt-4 w-full rounded-xl py-2.5 text-sm font-semibold text-white gradient-primary hover:scale-[1.01] transition-transform flex items-center justify-center"
           >
             {upgrading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upgrade Now'}
           </button>

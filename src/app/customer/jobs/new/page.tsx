@@ -158,9 +158,9 @@ export default function NewJobPage() {
                 onClick={() => setUrgency(level)}
                 className="rounded-xl px-3 py-2 text-sm font-medium capitalize transition-all"
                 style={{
-                  background: urgency === level ? 'var(--color-primary)' : 'var(--color-bg-secondary)',
+                  background: urgency === level ? 'var(--color-primary-50)' : 'var(--color-bg-secondary)',
                   border: `1px solid ${urgency === level ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  color: urgency === level ? 'white' : 'var(--color-text-secondary)',
+                  color: urgency === level ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                 }}
               >
                 {level}
