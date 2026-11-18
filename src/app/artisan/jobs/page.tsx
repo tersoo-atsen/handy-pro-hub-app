@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Clock, DollarSign, Briefcase, Gavel, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { MapPin, Clock, DollarSign, Briefcase, Gavel, MessageSquare, Loader2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { useGeolocation } from '@/hooks/use-geolocation';
 import { getAllCategories } from '@/features/search/services/search-service';
 import { findNearbyJobs } from '@/features/jobs/services/job-service';
 import { createBid } from '@/features/bidding/services/bid-service';
+import { getOrCreateConversation } from '@/features/messaging/services/message-service';
 import type { CategoryItem } from '@/features/search/types';
 import type { JobRequest } from '@/features/jobs/types';
 
@@ -26,11 +28,29 @@ const urgencyStyles: Record<string, { bg: string; color: string }> = {
 };
 
 export default function ArtisanJobsPage() {
+  const router = useRouter();
   const { profile } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<Array<{ name: string; slug: string }>>(fallbackCategories);
   const [jobs, setJobs] = useState<JobRequest[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [messagingJobId, setMessagingJobId] = useState<string | null>(null);
+
+  const handleMessageCustomer = async (job: JobRequest) => {
+    if (!profile?.id || !job.customer_id) return;
+    setMessagingJobId(job.id);
+    const { data } = await getOrCreateConversation({
+      participant_1: profile.id,
+      participant_2: job.customer_id,
+      job_id: job.id,
+    });
+    setMessagingJobId(null);
+    if (data?.id) {
+      router.push(`/artisan/messages?conversationId=${encodeURIComponent(data.id)}`);
+    } else {
+      router.push('/artisan/messages');
+    }
+  };
 
   const [biddingJobId, setBiddingJobId] = useState<string | null>(null);
   const [bidAmount, setBidAmount] = useState('');
@@ -213,14 +233,30 @@ export default function ArtisanJobsPage() {
                     </h3>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleOpenBidForm(job.id)}
-                    className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary"
-                  >
-                    <Gavel className="h-3.5 w-3.5" />
-                    {isOpenForm ? 'Cancel' : 'Place Bid'}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={messagingJobId === job.id || job.customer_id === profile?.id}
+                      onClick={() => handleMessageCustomer(job)}
+                      className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:opacity-60"
+                      style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                    >
+                      {messagingJobId === job.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <MessageSquare className="h-3.5 w-3.5" />
+                      )}
+                      Message
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenBidForm(job.id)}
+                      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-white gradient-primary"
+                    >
+                      <Gavel className="h-3.5 w-3.5" />
+                      {isOpenForm ? 'Cancel' : 'Place Bid'}
+                    </button>
+                  </div>
                 </div>
 
                 <p className="text-sm line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>

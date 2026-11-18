@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Home, Briefcase, Calendar, MessageSquare, User, Search } from 'lucide-react';
+import { NotificationBell } from '@/features/notifications/components/notification-bell';
 import { NavLink } from '@/components/nav-link';
 
 const customerNav = [
@@ -43,6 +44,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             </NavLink>
           ))}
         </nav>
+        <NotificationBell />
       </header>
 
       {/* Main content */}
