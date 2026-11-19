@@ -12,7 +12,7 @@ export function VerificationBadge({ verified, className = '' }: VerificationBadg
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-white shrink-0 ${className}`}
       style={{
-        backgroundColor: isVerified ? '#4F2BF7' : '#F97316',
+        backgroundColor: isVerified ? 'var(--color-brand-blue)' : 'var(--color-primary)',
       }}
     >
       {isVerified ? (

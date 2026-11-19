@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageSquare, Send, User, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, User, Trash2, Loader2 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import {
+  deleteEmptyConversation,
   getConversations,
   getMessages,
   sendMessage,
@@ -19,6 +21,26 @@ export default function CustomerMessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+
+  const handleConfirmDelete = async () => {
+    if (!profile?.id || !pendingDelete) return;
+    const conversationId = pendingDelete.id;
+    setDeletingId(conversationId);
+    const { error } = await deleteEmptyConversation(conversationId, profile.id);
+    setDeletingId(null);
+    setPendingDelete(null);
+    if (!error) {
+      setConversations((prev) => {
+        const next = prev.filter((c) => c.id !== conversationId);
+        if (selectedConversation?.id === conversationId) {
+          setSelectedConversation(next[0] ?? null);
+        }
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     if (!profile?.id) {
@@ -123,12 +145,20 @@ export default function CustomerMessagesPage() {
           ) : (
             conversations.map((conv) => {
               const isSelected = selectedConversation?.id === conv.id;
+              const isEmpty = !conv.last_message;
               return (
-                <button
+                <div
                   key={conv.id}
-                  type="button"
                   onClick={() => setSelectedConversation(conv)}
-                  className="w-full text-left rounded-md p-3 transition-all flex items-start gap-3"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedConversation(conv);
+                    }
+                  }}
+                  className="w-full text-left rounded-md p-3 transition-all flex items-start gap-3 cursor-pointer"
                   style={{
                     background: isSelected ? 'var(--color-primary-50)' : 'transparent',
                     border: `1px solid ${isSelected ? 'var(--color-primary)' : 'transparent'}`,
@@ -147,13 +177,40 @@ export default function CustomerMessagesPage() {
                         {conv.job_title}
                       </p>
                     )}
-                    {conv.last_message && (
+                    {conv.last_message ? (
                       <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
                         {conv.last_message}
                       </p>
+                    ) : (
+                      <p className="text-xs italic mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                        No messages yet
+                      </p>
                     )}
                   </div>
-                </button>
+                  {isEmpty && (
+                    <button
+                      type="button"
+                      disabled={deletingId === conv.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPendingDelete({
+                          id: conv.id,
+                          name: conv.other_user_name ?? 'Artisan',
+                        });
+                      }}
+                      className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 transition-colors hover:bg-[var(--color-surface-hover)] disabled:opacity-60"
+                      style={{ color: '#EF4444' }}
+                      aria-label="Delete empty conversation"
+                      title="Delete empty conversation"
+                    >
+                      {deletingId === conv.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  )}
+                </div>
               );
             })
           )}
@@ -257,6 +314,16 @@ export default function CustomerMessagesPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete conversation?"
+        description={`This will remove your empty conversation with ${pendingDelete?.name ?? 'this user'}.`}
+        confirmLabel="Delete"
+        loading={Boolean(deletingId)}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

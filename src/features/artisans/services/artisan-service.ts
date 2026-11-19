@@ -70,6 +70,7 @@ export async function updateArtisanProfile(
     hourly_rate?: number;
     is_available?: boolean;
     service_radius_km?: number;
+    category_slug?: string;
     skills?: Array<{ skill_id: string; proficiency?: number }>;
   }
 ) {

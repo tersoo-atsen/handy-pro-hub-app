@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { LayoutDashboard, MapPin, Gavel, Calendar, MessageSquare, User, Clock } from 'lucide-react';
 import { NotificationBell } from '@/features/notifications/components/notification-bell';
+import { ArtisanSidebarAccount } from '@/features/artisans/components/artisan-sidebar-account';
+import { ArtisanAvatarMenu } from '@/features/artisans/components/artisan-avatar-menu';
 import { NavLink } from '@/components/nav-link';
 
 const artisanNav = [
@@ -47,10 +49,13 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
             </NavLink>
           ))}
         </nav>
+        <div className="p-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+          <ArtisanSidebarAccount />
+        </div>
       </aside>
 
       {/* Main */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 min-w-0 lg:ml-64">
         {/* Top bar on mobile */}
         <header
           className="lg:hidden sticky top-0 z-40 h-16 flex items-center justify-between px-4"
@@ -64,10 +69,13 @@ export default function ArtisanLayout({ children }: { children: React.ReactNode 
               Handy<span className="text-gradient">Pro</span>
             </span>
           </Link>
-          <NotificationBell />
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <ArtisanAvatarMenu />
+          </div>
         </header>
 
-        <main className="p-6 lg:p-8 max-w-6xl">
+        <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 lg:py-8">
           {children}
         </main>
 

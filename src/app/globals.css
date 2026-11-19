@@ -15,10 +15,12 @@
   --color-primary-600: #EA580C;
   --color-primary-700: #C2410C;
 
-  /* Accent */
+  /* Accent / Trust Blue */
   --color-accent: #0B70C9;
   --color-accent-light: #3898EC;
   --color-accent-dark: #0759A3;
+  --color-brand-blue: #246EB9;
+  --color-brand-blue-soft: #EEF6FC;
 
   /* Surface & Background */
   --color-bg: #FCFCFC;
@@ -113,7 +115,15 @@ body {
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 50%, var(--color-accent) 100%);
+  background: linear-gradient(180deg, #FFF5EC 0%, #FCFCFC 75%);
+}
+
+.shadow-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-lift {
+  box-shadow: 0 20px 35px -10px rgba(24, 24, 27, 0.12), 0 8px 14px -6px rgba(24, 24, 27, 0.06);
 }
 
 .text-gradient {

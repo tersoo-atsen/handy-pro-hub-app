@@ -149,3 +149,35 @@ export function subscribeToMessages(
   };
 }
 
+export async function deleteEmptyConversation(
+  conversationId: string,
+  userId?: string
+): Promise<{
+  data: { deleted: boolean; id: string } | null;
+  error: Error | null;
+}> {
+  try {
+    const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+    const response = await fetch(
+      `${API_BASE}/conversations/${encodeURIComponent(conversationId)}${query}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to delete conversation') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to delete conversation'),
+    };
+  }
+}
+
