@@ -1,327 +1,506 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, MapPin, Star, Shield, Zap, Users, CheckCircle } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarCheck,
+  Handshake,
+  MapPin,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  Star,
+  Users,
+  Wrench,
+} from 'lucide-react';
+import { PublicNavbar } from '@/components/public-navbar';
+import { PublicFooter } from '@/components/public-footer';
+import { getAllCategories } from '@/features/search/services/search-service';
+import { findNearbyArtisans } from '@/features/artisans/services/artisan-service';
+import { VerificationBadge } from '@/features/artisans/components/verification-badge';
+import type { CategoryItem, SearchResult } from '@/features/search/types';
 
-const categories = [
-  { name: 'Plumbing', slug: 'plumbing', icon: '🔧', color: 'from-blue-500 to-cyan-400' },
-  { name: 'Electrical', slug: 'electrical', icon: '⚡', color: 'from-amber-500 to-yellow-400' },
-  { name: 'Carpentry', slug: 'carpentry', icon: '🪚', color: 'from-orange-500 to-red-400' },
-  { name: 'Painting', slug: 'painting', icon: '🎨', color: 'from-pink-500 to-rose-400' },
-  { name: 'Cleaning', slug: 'cleaning', icon: '✨', color: 'from-emerald-500 to-green-400' },
-  { name: 'AC & Cooling', slug: 'ac-refrigeration', icon: '❄️', color: 'from-sky-500 to-blue-400' },
-  { name: 'Tiling', slug: 'tiling', icon: '🏗️', color: 'from-violet-500 to-purple-400' },
-  { name: 'Welding', slug: 'welding', icon: '🔩', color: 'from-slate-500 to-gray-400' },
+const fallbackCategories: Array<{ name: string; slug: string; description: string }> = [
+  { name: 'Plumbing', slug: 'plumbing', description: 'Pipe repairs, installations, and leak detection' },
+  { name: 'Electrical', slug: 'electrical', description: 'Wiring, circuit breakers, and lighting setup' },
+  { name: 'Carpentry', slug: 'carpentry', description: 'Furniture making, doors, and woodwork' },
+  { name: 'Painting', slug: 'painting', description: 'Interior and exterior painting services' },
+  { name: 'Cleaning', slug: 'cleaning', description: 'Deep home and office cleaning' },
+  { name: 'AC & Refrigeration', slug: 'ac-refrigeration', description: 'AC servicing, gas charging, and repairs' },
+  { name: 'Tiling', slug: 'tiling', description: 'Floor, wall, and bathroom tiling' },
+  { name: 'Welding', slug: 'welding', description: 'Gate fabrication and structural welding' },
 ];
 
-const stats = [
-  { value: '2,500+', label: 'Verified Artisans' },
-  { value: '15,000+', label: 'Jobs Completed' },
-  { value: '4.8★', label: 'Average Rating' },
-  { value: '<5min', label: 'Avg. Response Time' },
-];
-
-const steps = [
+const howItWorksSteps = [
   {
-    step: '01',
-    title: 'Describe Your Job',
-    description: 'Tell us what you need — from a leaky pipe to a full renovation. Add photos for accuracy.',
-    icon: CheckCircle,
+    step: '1. Search a service',
+    description: 'Browse verified categories or search for the exact skill you need.',
+    icon: Search,
   },
   {
-    step: '02',
-    title: 'Get Instant Bids',
-    description: 'Nearby verified artisans see your request and send competitive bids in real time.',
-    icon: Zap,
-  },
-  {
-    step: '03',
-    title: 'Choose & Book',
-    description: 'Compare ratings, reviews, and prices. Pick the best artisan and confirm your booking.',
+    step: '2. Compare professionals',
+    description: 'Review ratings, hourly rates, skills, and verification badges.',
     icon: Users,
   },
   {
-    step: '04',
-    title: 'Track & Pay',
-    description: 'Track your artisan live. Pay securely when the job is done to your satisfaction.',
-    icon: Shield,
+    step: '3. Request & schedule',
+    description: 'Post a job request, receive bids, and confirm your booking.',
+    icon: CalendarCheck,
+  },
+  {
+    step: '4. Get it done & review',
+    description: 'Track progress, message directly, and leave a verified review.',
+    icon: Handshake,
+  },
+];
+
+const whyChooseItems = [
+  {
+    title: 'Verified professionals',
+    description: 'Artisans undergo ID and skill review before earning a Verified badge.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Real customer ratings',
+    description: 'Every review comes from a completed booking on the platform.',
+    icon: Star,
+  },
+  {
+    title: 'Instant direct contact',
+    description: 'Chat directly with artisans in real time before and during the job.',
+    icon: MessageCircle,
+  },
+  {
+    title: 'Built for Makurdi',
+    description: 'Tailored for Makurdi, Benue State and expanding across Nigeria.',
+    icon: MapPin,
   },
 ];
 
 export default function LandingPage() {
+  const [categories, setCategories] = useState<Array<{ name: string; slug: string; description?: string | null }>>(
+    fallbackCategories
+  );
+  const [artisans, setArtisans] = useState<SearchResult[]>([]);
+
+  useEffect(() => {
+    getAllCategories().then(({ data }) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setCategories(data.map((c: CategoryItem) => ({ name: c.name, slug: c.slug, description: c.description })));
+      }
+    });
+
+    findNearbyArtisans().then(({ data }) => {
+      if (Array.isArray(data)) {
+        const sorted = [...data].sort(
+          (a, b) => Number(b.rating_avg ?? 0) - Number(a.rating_avg ?? 0)
+        );
+        setArtisans(sorted.slice(0, 6));
+      }
+    });
+  }, []);
+
+  const verifiedCount = artisans.filter((a) => a.is_verified).length;
+
   return (
-    <main className="flex flex-col">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-(--color-surface) border-b border-(--color-border)">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
-                <span className="font-bold text-sm">H</span>
-              </div>
-              <span className="text-xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Handy<span className="text-gradient">Pro</span>
-              </span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#how-it-works" className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>How it Works</a>
-              <a href="#categories" className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Services</a>
-              <Link href="/login" className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Sign In</Link>
-              <Link
-                href="/register"
-                className="rounded-full px-5 py-2 text-sm font-semibold text-white transition-all hover:scale-105 gradient-primary"
-                style={{ boxShadow: 'var(--shadow-md)' }}
-              >
-                Get Started
-              </Link>
-            </div>
-            <div className="flex items-center gap-3 md:hidden">
-              <Link href="/login" className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-white gradient-primary"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
+      <PublicNavbar />
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-        {/* Background gradient */}
-        <div className="absolute inset-0 gradient-hero opacity-5" />
-        <div
-          className="absolute top-20 right-10 w-72 h-72 rounded-full opacity-20 blur-3xl"
-          style={{ background: 'var(--color-primary)' }}
-        />
-        <div
-          className="absolute bottom-20 left-10 w-96 h-96 rounded-full opacity-15 blur-3xl"
-          style={{ background: 'var(--color-accent)' }}
-        />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="animate-fade-in">
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium mb-8"
-              style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
-            >
-              <MapPin className="h-4 w-4" />
-              Serving 25+ cities across Nigeria
-            </div>
-
-            <h1
-              className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6"
-              style={{ fontFamily: 'var(--font-outfit)' }}
-            >
-              Skilled Artisans,
-              <br />
-              <span className="text-gradient">At Your Doorstep</span>
-            </h1>
-
-            <p
-              className="mx-auto max-w-2xl text-lg sm:text-xl mb-10 leading-relaxed"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              From emergency plumbing to home renovations — find verified professionals
-              near you, get instant bids, and book with confidence.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className="group inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold text-white transition-all hover:scale-105 gradient-primary"
-                style={{ boxShadow: 'var(--shadow-lg)' }}
-              >
-                Find an Artisan
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="/register/artisan"
-                className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:scale-105"
-                style={{
-                  background: 'var(--color-surface)',
-                  color: 'var(--color-text)',
-                  boxShadow: 'var(--shadow-md)',
-                  border: '1px solid var(--color-border)',
-                }}
-              >
-                Join as a Pro
-                <Star className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
-              </Link>
-            </div>
-          </div>
-
-          {/* Stats row */}
-          <div
-            className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 animate-slide-up"
-            style={{ animationDelay: '0.3s' }}
-          >
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-md p-6 text-center transition-transform hover:scale-105"
-                style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
-              >
-                <div className="text-3xl font-bold text-gradient" style={{ fontFamily: 'var(--font-outfit)' }}>
-                  {stat.value}
-                </div>
-                <div className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section id="categories" className="py-24" style={{ background: 'var(--color-bg-secondary)' }}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2
-              className="text-3xl sm:text-4xl font-bold mb-4"
-              style={{ fontFamily: 'var(--font-outfit)' }}
-            >
-              Every Service You Need
-            </h2>
-            <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-              Browse from 10+ categories of skilled professionals
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/search?category=${cat.slug}`}
-                className="group relative overflow-hidden rounded-md p-6 text-center transition-all hover:scale-105 hover:-translate-y-1"
-                style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border-light)' }}
-              >
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-md bg-linear-to-br ${cat.color} text-2xl mb-3`}>
-                  {cat.icon}
-                </div>
-                <h3 className="font-semibold text-sm">{cat.name}</h3>
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="gradient-hero py-14 lg:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Column */}
+              <div className="space-y-6 animate-fade-in">
                 <div
-                  className="absolute inset-x-0 bottom-0 h-1 transition-all duration-300 opacity-0 group-hover:opacity-100 bg-linear-to-r"
-                  style={{ background: 'var(--color-primary)' }}
-                />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section id="how-it-works" className="py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2
-              className="text-3xl sm:text-4xl font-bold mb-4"
-              style={{ fontFamily: 'var(--font-outfit)' }}
-            >
-              How It Works
-            </h2>
-            <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-              Get your job done in 4 simple steps
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((item) => (
-              <div key={item.step} className="relative group">
-                <div
-                  className="rounded-md p-8 h-full transition-all hover:-translate-y-2"
-                  style={{ background: 'var(--color-surface)', boxShadow: 'var(--shadow-md)', border: '1px solid var(--color-border-light)' }}
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
+                  style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
                 >
-                  <span
-                    className="text-5xl font-black opacity-10 absolute top-4 right-4"
-                    style={{ fontFamily: 'var(--font-outfit)', color: 'var(--color-primary)' }}
+                  <MapPin className="h-3.5 w-3.5" />
+                  Verified artisans in Makurdi, Benue State
+                </div>
+
+                <h1
+                  className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.12]"
+                  style={{ fontFamily: 'var(--font-jakarta), var(--font-outfit)' }}
+                >
+                  Find the Right Professional.{' '}
+                  <span style={{ color: 'var(--color-primary)' }}>Get the Job Done.</span>
+                </h1>
+
+                <p className="text-base leading-relaxed max-w-xl" style={{ color: 'var(--color-text-secondary)' }}>
+                  Connect with vetted plumbers, electricians, carpenters, mechanics, and technicians across Makurdi. Compare ratings, message directly, and hire with confidence.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+                  <Link
+                    href="/professionals"
+                    className="inline-flex items-center justify-center gap-2 rounded-md px-6 h-12 text-sm font-semibold text-white gradient-primary shadow-card transition-transform hover:scale-[1.02]"
                   >
-                    {item.step}
-                  </span>
-                  <div
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
-                    style={{ background: 'var(--color-primary-50)' }}
+                    Find a Professional
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/register/artisan"
+                    className="inline-flex items-center justify-center gap-2 rounded-md px-6 h-12 text-sm font-semibold text-white shadow-card transition-transform hover:scale-[1.02]"
+                    style={{ backgroundColor: 'var(--color-brand-blue)' }}
                   >
-                    <item.icon className="h-6 w-6" style={{ color: 'var(--color-primary)' }} />
+                    Become a Professional
+                  </Link>
+                </div>
+
+                {/* Stats Row */}
+                <div
+                  className="pt-6 grid grid-cols-3 gap-6 max-w-md"
+                  style={{ borderTop: '1px solid var(--color-border)' }}
+                >
+                  <div>
+                    <p className="text-xl font-extrabold">{verifiedCount > 0 ? `${verifiedCount}+` : `${artisans.length}+`}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>Verified pros</p>
                   </div>
-                  <h3 className="text-lg font-bold mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>
-                    {item.title}
-                  </h3>
+                  <div>
+                    <p className="text-xl font-extrabold">{categories.length}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>Service categories</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-extrabold">Makurdi</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>City coverage</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Visual Hero Card */}
+              <div className="relative">
+                <div
+                  className="rounded-md overflow-hidden shadow-lift relative aspect-square max-w-lg mx-auto flex flex-col justify-between p-8"
+                  style={{
+                    background: 'linear-gradient(135deg, #FFF7ED 0%, #EEF6FC 100%)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                      style={{ background: 'var(--color-surface)', color: 'var(--color-primary)' }}
+                    >
+                      <Wrench className="h-3.5 w-3.5" />
+                      Skilled Trades
+                    </span>
+                    <VerificationBadge verified />
+                  </div>
+
+                  <div className="my-auto py-8 text-center space-y-4">
+                    <div
+                      className="mx-auto h-20 w-20 rounded-md gradient-primary flex items-center justify-center text-white shadow-card"
+                    >
+                      <Wrench className="h-10 w-10" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-lg font-bold">Trusted Local Experts</p>
+                      <p className="text-xs max-w-xs mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
+                        Plumbing, Electrical, Carpentry, AC Repair, Tiling &amp; more — ready when you need them.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Frosted Bottom-Left Verification Card */}
+                  <div
+                    className="rounded-md p-4 backdrop-blur-md shadow-card"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.92)',
+                      border: '1px solid var(--color-border-light)',
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="h-9 w-9 rounded-md flex items-center justify-center shrink-0"
+                        style={{ background: 'var(--color-brand-blue-soft)', color: 'var(--color-brand-blue)' }}
+                      >
+                        <ShieldCheck className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold">ID &amp; skill verified</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                          Every professional is reviewed by our team before going live.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Popular Services */}
+        <section className="py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Popular services</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  Pick a category and see the professionals available near you.
+                </p>
+              </div>
+              <Link
+                href="/services"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold shrink-0"
+                style={{ color: 'var(--color-primary)' }}
+              >
+                View all services
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {categories.slice(0, 8).map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/professionals?category=${encodeURIComponent(cat.slug)}`}
+                  className="rounded-md p-5 transition-all hover:scale-[1.01] shadow-card block"
+                  style={{
+                    background: 'var(--color-surface)',
+                    border: '1px solid var(--color-border-light)',
+                  }}
+                >
+                  <div
+                    className="h-10 w-10 rounded-md flex items-center justify-center mb-3"
+                    style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                  >
+                    <Wrench className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-sm font-bold">{cat.name}</h3>
+                  {cat.description && (
+                    <p className="text-xs mt-1 line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
+                      {cat.description}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How HandyPro Hub Works */}
+        <section
+          className="py-14"
+          style={{
+            background: 'var(--color-surface)',
+            borderTop: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--color-border)',
+          }}
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                How HandyPro Hub works
+              </h2>
+              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Get your job done in 4 simple steps
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {howItWorksSteps.map((item) => (
+                <div key={item.step} className="space-y-3">
+                  <div className="h-11 w-11 rounded-md gradient-primary flex items-center justify-center text-white shadow-card">
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-sm font-bold">{item.step}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                     {item.description}
                   </p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
-      <section className="py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div
-            className="relative overflow-hidden rounded-md gradient-primary p-12 md:p-20 text-center"
-            style={{ boxShadow: 'var(--shadow-xl)' }}
-          >
-            <div
-              className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 blur-3xl"
-              style={{ background: 'var(--color-accent)' }}
-            />
-            <div className="relative z-10">
-              <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6"
-                style={{ fontFamily: 'var(--font-outfit)', color: 'var(--color-text)' }}
+        {/* Top-Rated Professionals */}
+        <section className="py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                  Top-rated professionals
+                </h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  Highest rated verified artisans on the platform right now.
+                </p>
+              </div>
+              <Link
+                href="/professionals"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold shrink-0"
+                style={{ color: 'var(--color-primary)' }}
               >
-                Ready to Get Started?
-              </h2>
-              <p className="text-lg max-w-2xl mx-auto mb-10" style={{ color: 'var(--color-text)' }}>
-                Join thousands of customers and artisans already using Handy Pro.
-                Your next trusted professional is just a tap away.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:scale-105"
-                  style={{ background: 'var(--color-surface)', color: 'var(--color-primary-dark)' }}
-                >
-                  Find an Artisan
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-                <Link
-                  href="/register/artisan"
-                  className="inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:scale-105"
-                  style={{ border: '2px solid var(--color-text)', color: 'var(--color-text)' }}
-                >
-                  Become a Pro
-                </Link>
-              </div>
+                Browse all
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)' }}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-md gradient-primary flex items-center justify-center">
-                <span className="font-bold text-sm">H</span>
+            {artisans.length === 0 ? (
+              <div
+                className="rounded-md p-10 text-center shadow-card"
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border-light)',
+                }}
+              >
+                <p className="text-sm font-medium mb-2">Professionals are joining daily</p>
+                <p className="text-xs mb-5" style={{ color: 'var(--color-text-secondary)' }}>
+                  Explore the directory or post a job request to get bids from local artisans.
+                </p>
+                <Link
+                  href="/professionals"
+                  className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-xs font-semibold text-white gradient-primary"
+                >
+                  Explore Professionals
+                </Link>
               </div>
-              <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Handy<span className="text-gradient">Pro</span>
-              </span>
-            </div>
-            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              © {new Date().getFullYear()} Handy Pro. All rights reserved.
-            </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {artisans.map((artisan) => (
+                  <div
+                    key={artisan.artisan_id}
+                    className="rounded-md p-5 space-y-3 shadow-card"
+                    style={{
+                      background: 'var(--color-surface)',
+                      border: '1px solid var(--color-border-light)',
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className="h-12 w-12 rounded-full flex items-center justify-center shrink-0"
+                          style={{ background: 'var(--color-primary-50)' }}
+                        >
+                          <Wrench className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-sm font-bold truncate">{artisan.full_name}</h3>
+                            <VerificationBadge verified={artisan.is_verified} />
+                          </div>
+                          <p className="text-xs mt-0.5 inline-flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
+                            <Star className="h-3.5 w-3.5" style={{ color: '#F59E0B', fill: '#F59E0B' }} />
+                            {Number(artisan.rating_avg ?? 0).toFixed(1)} ({artisan.rating_count ?? 0})
+                          </p>
+                        </div>
+                      </div>
+                      {artisan.hourly_rate != null && (
+                        <span className="text-xs font-bold shrink-0" style={{ color: 'var(--color-primary)' }}>
+                          ₦{Number(artisan.hourly_rate).toLocaleString()}/hr
+                        </span>
+                      )}
+                    </div>
+
+                    {artisan.bio && (
+                      <p className="text-xs line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
+                        {artisan.bio}
+                      </p>
+                    )}
+
+                    <Link
+                      href="/professionals"
+                      className="inline-flex items-center gap-1 text-xs font-semibold"
+                      style={{ color: 'var(--color-brand-blue)' }}
+                    >
+                      View profile
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </footer>
-    </main>
+        </section>
+
+        {/* Why Choose HandyPro Hub */}
+        <section
+          className="py-14"
+          style={{
+            background: 'var(--color-surface)',
+            borderTop: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--color-border)',
+          }}
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+            <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Why choose HandyPro Hub
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {whyChooseItems.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-md p-5 shadow-card space-y-3"
+                  style={{
+                    background: 'var(--color-bg)',
+                    border: '1px solid var(--color-border-light)',
+                  }}
+                >
+                  <div
+                    className="h-10 w-10 rounded-full flex items-center justify-center"
+                    style={{ background: 'var(--color-brand-blue-soft)', color: 'var(--color-brand-blue)' }}
+                  >
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-sm font-bold">{item.title}</h3>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Bottom CTA Banner */}
+        <section className="py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div
+              className="rounded-md p-10 sm:p-14 text-center text-white shadow-lift space-y-4"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            >
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Ready to get your job done?
+              </h2>
+              <p className="text-sm sm:text-base max-w-2xl mx-auto opacity-90">
+                Tell us what you need and we&apos;ll match you with a verified professional in Makurdi.
+              </p>
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  href="/customer/jobs/new"
+                  className="inline-flex items-center justify-center gap-2 rounded-md px-6 h-11 text-sm font-semibold transition-transform hover:scale-[1.02]"
+                  style={{
+                    background: 'rgba(255,255,255,0.16)',
+                    border: '1px solid rgba(255,255,255,0.45)',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Request a service
+                </Link>
+                <Link
+                  href="/professionals"
+                  className="inline-flex items-center justify-center gap-2 rounded-md px-6 h-11 text-sm font-semibold transition-transform hover:scale-[1.02]"
+                  style={{
+                    background: '#FFFFFF',
+                    color: 'var(--color-primary-dark)',
+                  }}
+                >
+                  Browse professionals
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <PublicFooter />
+    </div>
   );
 }

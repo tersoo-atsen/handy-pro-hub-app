@@ -69,6 +69,9 @@ export async function signUp(data: RegisterData) {
       lastName,
       email: data.email,
       password: data.password,
+      ...(data.role === 'artisan' && data.category_slug
+        ? { category_slug: data.category_slug }
+        : {}),
     }),
   });
   if (!response.ok) {

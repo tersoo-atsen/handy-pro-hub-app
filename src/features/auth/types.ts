@@ -18,4 +18,5 @@ export interface RegisterData {
   phone?: string;
   password: string;
   role: 'customer' | 'artisan';
+  category_slug?: string;
 }
