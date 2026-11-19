@@ -71,6 +71,26 @@ body {
   transition: background-color var(--transition-base), color var(--transition-base);
 }
 
+@layer base {
+  button {
+    cursor: pointer;
+    transition: transform var(--transition-fast), filter var(--transition-fast), opacity var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  button:not(:disabled):hover {
+    transform: scale(1.03);
+    filter: brightness(1.05);
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

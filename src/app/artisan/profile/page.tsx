@@ -9,6 +9,7 @@ import {
   ProfileInformationCard,
   type ArtisanDetailsState,
 } from '@/features/profiles/components/profile-information-card';
+import { ProfileAvatarCard } from '@/features/profiles/components/profile-avatar-card';
 import type { Review } from '@/features/reviews/types';
 
 export default function ArtisanProfilePage() {
@@ -57,7 +58,15 @@ export default function ArtisanProfilePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+      <ProfileAvatarCard
+        profile={profile}
+        isArtisan
+        ratingAvg={artisanDetails.ratingAvg}
+        ratingCount={artisanDetails.ratingCount}
+        verifiedAt={artisanDetails.verifiedAt}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-7 min-w-0">
           <ProfileInformationCard

@@ -5,6 +5,7 @@ import { useUser } from '@/hooks/use-user';
 import { getReviewsForUser } from '@/features/reviews/services/review-service';
 import { ReviewsList } from '@/features/reviews/components/reviews-list';
 import { ProfileInformationCard } from '@/features/profiles/components/profile-information-card';
+import { ProfileAvatarCard } from '@/features/profiles/components/profile-avatar-card';
 import type { Review } from '@/features/reviews/types';
 
 export default function CustomerProfilePage() {
@@ -23,7 +24,9 @@ export default function CustomerProfilePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+      <ProfileAvatarCard profile={profile} />
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-7 min-w-0">
           <ProfileInformationCard profile={profile} />
