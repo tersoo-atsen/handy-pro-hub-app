@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Camera, Loader2, Pencil, Star, User, Wrench, X } from 'lucide-react';
+import { Loader2, Pencil, X } from 'lucide-react';
 import type { UserProfile } from '@/hooks/use-user';
 import { updateProfile } from '@/features/profiles/services/profile-service';
 import { updateArtisanProfile } from '@/features/artisans/services/artisan-service';
 import { getAllCategories } from '@/features/search/services/search-service';
-import { VerificationBadge } from '@/features/artisans/components/verification-badge';
 import type { CategoryItem } from '@/features/search/types';
 
 export interface ArtisanDetailsState {
@@ -205,11 +204,6 @@ export function ProfileInformationCard({
     </div>
   );
 
-  const displayName =
-    [formData.firstName, formData.lastName].filter(Boolean).join(' ') ||
-    profile.full_name ||
-    'Your Name';
-
   return (
     <form
       onSubmit={handleSave}
@@ -220,12 +214,11 @@ export function ProfileInformationCard({
         border: '1px solid var(--color-border-light)',
       }}
     >
-      {/* Top Header + Avatar Row */}
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
-            Profile Information
-          </h1>
+      {/* Edit Button Header above User Information */}
+      <div className="p-6 flex items-center justify-between gap-4">
+        <h1 className="text-lg font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>
+          Profile Information
+        </h1>
 
           {!isEditing ? (
             <button
@@ -264,62 +257,6 @@ export function ProfileInformationCard({
             </div>
           )}
         </div>
-
-        {/* Avatar & Name */}
-        <div className="flex items-center gap-4">
-          <div className="relative shrink-0">
-            <div
-              className="h-16 w-16 rounded-full flex items-center justify-center overflow-hidden"
-              style={{ background: 'var(--color-primary-50)' }}
-            >
-              {profile.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={displayName}
-                  className="h-full w-full object-cover"
-                />
-              ) : isArtisan ? (
-                <Wrench className="h-7 w-7" style={{ color: 'var(--color-primary)' }} />
-              ) : (
-                <User className="h-7 w-7" style={{ color: 'var(--color-primary)' }} />
-              )}
-            </div>
-            {isEditing && (
-              <button
-                type="button"
-                className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full flex items-center justify-center text-white gradient-primary"
-                style={{ boxShadow: 'var(--shadow-md)' }}
-                aria-label="Change avatar"
-              >
-                <Camera className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base font-semibold truncate" style={{ fontFamily: 'var(--font-outfit)' }}>
-                {displayName}
-              </h2>
-              {isArtisan && (
-                <VerificationBadge verified={Boolean(profile.is_verified || proData.verifiedAt)} />
-              )}
-            </div>
-            {isArtisan ? (
-              <div className="flex items-center gap-1.5 mt-0.5 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                <Star className="h-3.5 w-3.5" style={{ color: '#F59E0B', fill: '#F59E0B' }} />
-                <span>
-                  {proData.ratingAvg.toFixed(1)} rating · {proData.ratingCount} reviews
-                </span>
-              </div>
-            ) : (
-              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Customer Account
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
 
       <div style={{ borderTop: '1px solid var(--color-border-light)' }} />
 
