@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, DollarSign, User, CheckCircle, XCircle, MessageSquare, Star, Loader2 } from 'lucide-react';
+import { Calendar, Clock, DollarSign, User, CheckCircle, XCircle, MessageSquare, Star, Loader2, CreditCard } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { getMyBookings, updateBookingStatus } from '@/features/bookings/services/booking-service';
 import { getOrCreateConversation } from '@/features/messaging/services/message-service';
+import {
+  getMyPayments,
+  initializePaystackPayment,
+  refundBookingViaPaystack,
+  verifyPaystackPayment,
+  type PaymentRecord,
+} from '@/features/payments/services/payment-service';
 import { ReviewForm } from '@/features/reviews/components/review-form';
 
 const statusBadgeStyles: Record<string, { bg: string; color: string }> = {
@@ -25,6 +32,13 @@ export default function CustomerBookingsPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [messagingBookingId, setMessagingBookingId] = useState<string | null>(null);
   const [reviewingBookingId, setReviewingBookingId] = useState<string | null>(null);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [payingBookingId, setPayingBookingId] = useState<string | null>(null);
+  const [refundingBookingId, setRefundingBookingId] = useState<string | null>(null);
+  const [paymentBanner, setPaymentBanner] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const handleMessageArtisan = async (booking: any) => {
     const artisanUserId =
@@ -52,14 +66,95 @@ export default function CustomerBookingsPage() {
       return;
     }
     setLoading(true);
-    getMyBookings(profile.id)
-      .then(({ data }) => {
-        setBookings(data ?? []);
+    Promise.all([getMyBookings(profile.id), getMyPayments(profile.id)])
+      .then(([bookingsRes, paymentsRes]) => {
+        setBookings(bookingsRes.data ?? []);
+        setPayments(paymentsRes.data ?? []);
       })
       .finally(() => {
         setLoading(false);
       });
   }, [profile?.id, userLoading]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get('reference') || params.get('trxref');
+    if (!reference) return;
+
+    verifyPaystackPayment(reference).then(({ data, error }) => {
+      if (error) {
+        setPaymentBanner({
+          type: 'error',
+          message: error.message || 'Could not verify Paystack payment.',
+        });
+      } else if (data?.verified) {
+        if (data.payment) {
+          setPayments((prev) => [
+            data.payment!,
+            ...prev.filter((p) => p.id !== data.payment!.id),
+          ]);
+        }
+        setPaymentBanner({
+          type: 'success',
+          message: 'Payment verified successfully.',
+        });
+      } else {
+        setPaymentBanner({
+          type: 'error',
+          message: `Payment status: ${data?.status ?? 'unverified'}.`,
+        });
+      }
+
+      const cleanUrl = `${window.location.pathname}`;
+      window.history.replaceState({}, '', cleanUrl);
+    });
+  }, []);
+
+  const handlePayBooking = async (bookingId: string) => {
+    setPaymentBanner(null);
+    setPayingBookingId(bookingId);
+    const callbackUrl =
+      typeof window !== 'undefined' ? `${window.location.origin}/customer/bookings` : undefined;
+    const { data, error } = await initializePaystackPayment(bookingId, callbackUrl);
+    setPayingBookingId(null);
+
+    if (error || !data?.authorization_url) {
+      setPaymentBanner({
+        type: 'error',
+        message: error?.message ?? 'Failed to start Paystack checkout.',
+      });
+      return;
+    }
+
+    window.location.href = data.authorization_url;
+  };
+
+  const handleRefundBooking = async (bookingId: string) => {
+    setPaymentBanner(null);
+    setRefundingBookingId(bookingId);
+    const { data, error } = await refundBookingViaPaystack(
+      bookingId,
+      'Customer requested refund for cancelled booking'
+    );
+    setRefundingBookingId(null);
+
+    if (error || !data?.payment) {
+      setPaymentBanner({
+        type: 'error',
+        message: error?.message ?? 'Failed to process refund.',
+      });
+      return;
+    }
+
+    setPayments((prev) =>
+      prev.map((p) => (p.id === data.payment.id ? data.payment : p))
+    );
+    setPaymentBanner({
+      type: 'success',
+      message: 'Refund processed successfully.',
+    });
+  };
 
   const handleStatusChange = async (
     bookingId: string,
@@ -73,6 +168,17 @@ export default function CustomerBookingsPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? data : b))
       );
+      if (status === 'cancelled') {
+        const hasHeldPayment = payments.some(
+          (p) =>
+            p.booking_id === bookingId &&
+            p.status === 'completed' &&
+            p.provider !== 'paystack_paid_out'
+        );
+        if (hasHeldPayment) {
+          await handleRefundBooking(bookingId);
+        }
+      }
     }
     setUpdatingId(null);
   };
@@ -93,6 +199,21 @@ export default function CustomerBookingsPage() {
         <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Bookings</h1>
         <p style={{ color: 'var(--color-text-secondary)' }}>Your upcoming and past bookings</p>
       </div>
+
+      {paymentBanner && (
+        <div
+          className="rounded-md px-4 py-3 text-sm font-medium"
+          style={{
+            background:
+              paymentBanner.type === 'success'
+                ? 'rgba(16,185,129,0.1)'
+                : 'rgba(239,68,68,0.1)',
+            color: paymentBanner.type === 'success' ? '#10B981' : '#EF4444',
+          }}
+        >
+          {paymentBanner.message}
+        </div>
+      )}
 
       <div className="flex gap-1 rounded-md p-1" style={{ background: 'var(--color-bg-secondary)' }}>
         {['Upcoming', 'In Progress', 'Completed', 'Cancelled'].map((tab) => (
@@ -142,6 +263,12 @@ export default function CustomerBookingsPage() {
               booking.artisan_profiles?.user_id ??
               booking.artisan_profiles?.profiles?.id ??
               booking.artisan_id;
+            const isPaid = payments.some(
+              (p) => p.booking_id === booking.id && p.status === 'completed'
+            );
+            const isRefunded = payments.some(
+              (p) => p.booking_id === booking.id && p.status === 'refunded'
+            );
             const myReview = Array.isArray(booking.reviews)
               ? booking.reviews.find((r: any) => r.reviewer_id === profile?.id)
               : null;
@@ -220,6 +347,53 @@ export default function CustomerBookingsPage() {
                         )}
                         Cancel
                       </button>
+                    )}
+                    {booking.status === 'cancelled' && isRefunded && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                        style={{ background: 'rgba(107,114,128,0.12)', color: 'var(--color-text-secondary)' }}
+                      >
+                        Refunded
+                      </span>
+                    )}
+                    {booking.status === 'cancelled' && isPaid && !isRefunded && (
+                      <button
+                        type="button"
+                        disabled={refundingBookingId === booking.id}
+                        onClick={() => handleRefundBooking(booking.id)}
+                        className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold transition-all disabled:opacity-60"
+                        style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}
+                      >
+                        {refundingBookingId === booking.id && (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        )}
+                        Request Refund
+                      </button>
+                    )}
+                    {booking.status !== 'cancelled' && (
+                      isPaid ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                          style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}
+                        >
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Paid
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={payingBookingId === booking.id}
+                          onClick={() => handlePayBooking(booking.id)}
+                          className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                        >
+                          {payingBookingId === booking.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <CreditCard className="h-3.5 w-3.5" />
+                          )}
+                          Pay Now
+                        </button>
+                      )
                     )}
                     {booking.status === 'completed' && !myReview && (
                       <button

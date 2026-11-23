@@ -121,3 +121,104 @@ export async function findNearbyJobs(
     };
   }
 }
+
+export async function updateJob(
+  jobId: string,
+  payload: Partial<CreateJobInput> & { status?: JobRequest['status'] }
+): Promise<{
+  data: JobRequest | null;
+  error: Error | null;
+}> {
+  try {
+    const response = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to update job') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to update job'),
+    };
+  }
+}
+
+export async function deleteJob(jobId: string): Promise<{
+  data: { deleted: boolean; id: string } | null;
+  error: Error | null;
+}> {
+  try {
+    const response = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to delete job') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to delete job'),
+    };
+  }
+}
+
+export async function getJobSkills(jobId: string) {
+  try {
+    const response = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}/skills`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to fetch job skills') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to fetch job skills'),
+    };
+  }
+}
+
+export async function replaceJobSkills(jobId: string, skillIds: string[]) {
+  try {
+    const response = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}/skills`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ skill_ids: skillIds }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return { data: null, error: new Error(err.message ?? 'Failed to update job skills') };
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (err: any) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Failed to update job skills'),
+    };
+  }
+}
