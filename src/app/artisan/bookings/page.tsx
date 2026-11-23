@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, DollarSign, User, Play, CheckCircle, XCircle, MessageSquare, Star, Loader2 } from 'lucide-react';
+import { Calendar, Clock, DollarSign, User, Play, CheckCircle, XCircle, MessageSquare, Star, Loader2, Landmark } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { getMyBookings, updateBookingStatus } from '@/features/bookings/services/booking-service';
 import { getOrCreateConversation } from '@/features/messaging/services/message-service';
+import {
+  getMyPayments,
+  getPaystackBanks,
+  payoutBookingViaPaystack,
+  type PaymentRecord,
+  type PaystackBank,
+} from '@/features/payments/services/payment-service';
 import { ReviewForm } from '@/features/reviews/components/review-form';
 
 const statusBadgeStyles: Record<string, { bg: string; color: string }> = {
@@ -25,6 +32,19 @@ export default function ArtisanBookingsPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [messagingBookingId, setMessagingBookingId] = useState<string | null>(null);
   const [reviewingBookingId, setReviewingBookingId] = useState<string | null>(null);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [banks, setBanks] = useState<PaystackBank[]>([]);
+  const [payoutBookingId, setPayoutBookingId] = useState<string | null>(null);
+  const [payoutForm, setPayoutForm] = useState({
+    bank_code: '',
+    account_number: '',
+    account_name: '',
+  });
+  const [submittingPayoutId, setSubmittingPayoutId] = useState<string | null>(null);
+  const [payoutMessage, setPayoutMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const handleMessageCustomer = async (booking: any) => {
     if (!profile?.id || !booking.customer_id) return;
@@ -48,14 +68,58 @@ export default function ArtisanBookingsPage() {
       return;
     }
     setLoading(true);
-    getMyBookings(profile.id)
-      .then(({ data }) => {
-        setBookings(data ?? []);
+    Promise.all([getMyBookings(profile.id), getMyPayments(profile.id)])
+      .then(([bookingsRes, paymentsRes]) => {
+        setBookings(bookingsRes.data ?? []);
+        setPayments(paymentsRes.data ?? []);
       })
       .finally(() => {
         setLoading(false);
       });
   }, [profile?.id, userLoading]);
+
+  const handleOpenPayout = async (bookingId: string) => {
+    setPayoutMessage(null);
+    if (payoutBookingId === bookingId) {
+      setPayoutBookingId(null);
+      return;
+    }
+    setPayoutBookingId(bookingId);
+    if (banks.length === 0) {
+      const { data } = await getPaystackBanks();
+      if (data) setBanks(data);
+    }
+  };
+
+  const handleSubmitPayout = async (e: React.FormEvent, bookingId: string) => {
+    e.preventDefault();
+    if (!payoutForm.bank_code || !payoutForm.account_number.trim()) return;
+    setPayoutMessage(null);
+    setSubmittingPayoutId(bookingId);
+    const { data, error } = await payoutBookingViaPaystack(bookingId, {
+      bank_code: payoutForm.bank_code,
+      account_number: payoutForm.account_number.trim(),
+      account_name: payoutForm.account_name.trim() || undefined,
+    });
+    setSubmittingPayoutId(null);
+
+    if (error || !data) {
+      setPayoutMessage({
+        type: 'error',
+        text: error?.message ?? 'Failed to process payout.',
+      });
+      return;
+    }
+
+    setPayments((prev) =>
+      prev.map((p) => (p.id === data.payment.id ? data.payment : p))
+    );
+    setPayoutBookingId(null);
+    setPayoutMessage({
+      type: 'success',
+      text: `Payout of ₦${data.net_amount.toLocaleString()} initiated (₦${data.platform_fee.toLocaleString()} platform commission retained).`,
+    });
+  };
 
   const handleStatusChange = async (
     bookingId: string,
@@ -89,6 +153,21 @@ export default function ArtisanBookingsPage() {
         <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-outfit)' }}>Bookings</h1>
         <p style={{ color: 'var(--color-text-secondary)' }}>Manage your upcoming and completed jobs</p>
       </div>
+
+      {payoutMessage && (
+        <div
+          className="rounded-md px-4 py-3 text-sm font-medium"
+          style={{
+            background:
+              payoutMessage.type === 'success'
+                ? 'rgba(16,185,129,0.1)'
+                : 'rgba(239,68,68,0.1)',
+            color: payoutMessage.type === 'success' ? '#10B981' : '#EF4444',
+          }}
+        >
+          {payoutMessage.text}
+        </div>
+      )}
 
       <div className="flex gap-1 rounded-md p-1" style={{ background: 'var(--color-bg-secondary)' }}>
         {['Upcoming', 'In Progress', 'Completed', 'Cancelled'].map((tab) => (
@@ -137,6 +216,10 @@ export default function ArtisanBookingsPage() {
             const myReview = Array.isArray(booking.reviews)
               ? booking.reviews.find((r: any) => r.reviewer_id === profile?.id)
               : null;
+            const completedPayment = payments.find(
+              (p) => p.booking_id === booking.id && p.status === 'completed'
+            );
+            const isPaidOut = completedPayment?.provider === 'paystack_paid_out';
 
             return (
               <div
@@ -198,19 +281,13 @@ export default function ArtisanBookingsPage() {
                       </button>
                     )}
                     {booking.status === 'in_progress' && (
-                      <button
-                        type="button"
-                        disabled={updatingId === booking.id}
-                        onClick={() => handleStatusChange(booking.id, 'completed')}
-                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+                        style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}
                       >
-                        {updatingId === booking.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <CheckCircle className="h-3.5 w-3.5" />
-                        )}
-                        Complete Job
-                      </button>
+                        <Clock className="h-3.5 w-3.5" />
+                        Awaiting customer approval
+                      </span>
                     )}
                     {(booking.status === 'pending' || booking.status === 'confirmed') && (
                       <button
@@ -227,6 +304,26 @@ export default function ArtisanBookingsPage() {
                         )}
                         Cancel
                       </button>
+                    )}
+                    {booking.status === 'completed' && completedPayment && (
+                      isPaidOut ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                          style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}
+                        >
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Paid Out (₦{Number(completedPayment.net_amount ?? 0).toLocaleString()})
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenPayout(booking.id)}
+                          className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold text-white gradient-primary"
+                        >
+                          <Landmark className="h-3.5 w-3.5" />
+                          Withdraw ₦{Number(completedPayment.net_amount ?? 0).toLocaleString()}
+                        </button>
+                      )
                     )}
                     {booking.status === 'completed' && !myReview && (
                       <button
@@ -270,6 +367,96 @@ export default function ArtisanBookingsPage() {
                     </span>
                   )}
                 </div>
+
+                {payoutBookingId === booking.id && completedPayment && !isPaidOut && (
+                  <form
+                    onSubmit={(e) => handleSubmitPayout(e, booking.id)}
+                    className="pt-4 space-y-3"
+                    style={{ borderTop: '1px solid var(--color-border-light)' }}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="font-semibold">Payout Details</span>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>
+                        Gross: ₦{Number(completedPayment.amount ?? 0).toLocaleString()} · Platform Fee: ₦{Number(completedPayment.platform_fee ?? 0).toLocaleString()} · Net: ₦{Number(completedPayment.net_amount ?? 0).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <select
+                        required
+                        value={payoutForm.bank_code}
+                        onChange={(e) =>
+                          setPayoutForm({ ...payoutForm, bank_code: e.target.value })
+                        }
+                        className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                        style={{
+                          background: 'var(--color-bg-secondary)',
+                          border: '1px solid var(--color-border)',
+                          color: 'var(--color-text)',
+                        }}
+                      >
+                        <option value="">Select bank</option>
+                        {banks.map((b) => (
+                          <option key={b.code} value={b.code}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Account number (10 digits)"
+                        value={payoutForm.account_number}
+                        onChange={(e) =>
+                          setPayoutForm({ ...payoutForm, account_number: e.target.value })
+                        }
+                        className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                        style={{
+                          background: 'var(--color-bg-secondary)',
+                          border: '1px solid var(--color-border)',
+                          color: 'var(--color-text)',
+                        }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Account name (optional)"
+                        value={payoutForm.account_name}
+                        onChange={(e) =>
+                          setPayoutForm({ ...payoutForm, account_name: e.target.value })
+                        }
+                        className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                        style={{
+                          background: 'var(--color-bg-secondary)',
+                          border: '1px solid var(--color-border)',
+                          color: 'var(--color-text)',
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPayoutBookingId(null)}
+                        className="rounded-md px-3.5 py-2 text-xs font-medium"
+                        style={{
+                          background: 'var(--color-bg-secondary)',
+                          color: 'var(--color-text-secondary)',
+                          border: '1px solid var(--color-border)',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submittingPayoutId === booking.id}
+                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                      >
+                        {submittingPayoutId === booking.id && (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        )}
+                        Confirm Payout
+                      </button>
+                    </div>
+                  </form>
+                )}
 
                 {reviewingBookingId === booking.id && profile?.id && booking.customer_id && (
                   <ReviewForm

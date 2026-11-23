@@ -103,6 +103,9 @@ export default function ArtisanBidsPage() {
           {filteredBids.map((bid) => {
             const badge = statusBadgeStyles[bid.status] ?? statusBadgeStyles.pending;
             const job = bid.job_requests;
+            const latestBooking = Array.isArray(bid.bookings) ? bid.bookings[0] : null;
+            const isCancelled =
+              latestBooking?.status === 'cancelled' || job?.status === 'cancelled';
             return (
               <div
                 key={bid.id}
@@ -111,7 +114,7 @@ export default function ArtisanBidsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       {job?.categories?.name && (
                         <span
                           className="rounded-full px-2.5 py-0.5 text-xs font-medium"
@@ -126,10 +129,40 @@ export default function ArtisanBidsPage() {
                       >
                         {bid.status}
                       </span>
+                      {bid.status === 'accepted' && isCancelled && (
+                        <span
+                          className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}
+                        >
+                          {latestBooking?.status === 'cancelled'
+                            ? 'Booking Cancelled'
+                            : 'Job Cancelled'}
+                        </span>
+                      )}
+                      {bid.status === 'accepted' &&
+                        !isCancelled &&
+                        latestBooking?.status && (
+                          <span
+                            className="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                            style={{
+                              background: 'var(--color-bg-secondary)',
+                              color: 'var(--color-text-secondary)',
+                            }}
+                          >
+                            Booking: {String(latestBooking.status).replace('_', ' ')}
+                          </span>
+                        )}
                     </div>
                     <h3 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-outfit)' }}>
                       {job?.title ?? 'Job Request'}
                     </h3>
+                    {bid.status === 'accepted' &&
+                      isCancelled &&
+                      latestBooking?.cancellation_reason && (
+                        <p className="text-xs mt-1" style={{ color: '#EF4444' }}>
+                          Reason: {latestBooking.cancellation_reason}
+                        </p>
+                      )}
                   </div>
 
                   {bid.status === 'pending' && (

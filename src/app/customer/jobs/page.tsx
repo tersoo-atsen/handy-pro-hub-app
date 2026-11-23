@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Briefcase, Plus, MapPin, DollarSign, Clock, Gavel, CheckCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { Briefcase, Plus, MapPin, DollarSign, Clock, Gavel, CheckCircle, MessageSquare, Loader2, Pencil, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
-import { getMyJobs } from '@/features/jobs/services/job-service';
+import { deleteJob, getMyJobs, updateJob } from '@/features/jobs/services/job-service';
 import { getBidsForJob, acceptBid } from '@/features/bidding/services/bid-service';
 import { getOrCreateConversation } from '@/features/messaging/services/message-service';
 import { VerificationBadge } from '@/features/artisans/components/verification-badge';
@@ -23,6 +23,63 @@ export default function CustomerJobsPage() {
   const [loadingBidsJobId, setLoadingBidsJobId] = useState<string | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
   const [messagingBidId, setMessagingBidId] = useState<string | null>(null);
+  const [editingJobId, setEditingJobId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    urgency: 'normal' as JobRequest['urgency'],
+    budget_min: '',
+    budget_max: '',
+    address: '',
+  });
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
+  const [confirmDeleteJobId, setConfirmDeleteJobId] = useState<string | null>(null);
+  const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
+
+  const canEditJob = (status: string) => ['draft', 'open', 'bidding'].includes(status);
+
+  const startEditingJob = (job: any) => {
+    setConfirmDeleteJobId(null);
+    setEditingJobId(job.id);
+    setEditForm({
+      title: job.title ?? '',
+      description: job.description ?? '',
+      urgency: job.urgency ?? 'normal',
+      budget_min: job.budget_min != null ? String(job.budget_min) : '',
+      budget_max: job.budget_max != null ? String(job.budget_max) : '',
+      address: job.address ?? '',
+    });
+  };
+
+  const handleSaveJob = async (e: React.FormEvent, jobId: string) => {
+    e.preventDefault();
+    if (!editForm.title.trim()) return;
+    setSavingJobId(jobId);
+    const { data, error } = await updateJob(jobId, {
+      title: editForm.title.trim(),
+      description: editForm.description.trim(),
+      urgency: editForm.urgency,
+      budget_min: editForm.budget_min ? Number(editForm.budget_min) : undefined,
+      budget_max: editForm.budget_max ? Number(editForm.budget_max) : undefined,
+      address: editForm.address.trim() || undefined,
+    });
+    if (!error && data) {
+      setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...data } : j)));
+      setEditingJobId(null);
+    }
+    setSavingJobId(null);
+  };
+
+  const handleDeleteJob = async (jobId: string) => {
+    setDeletingJobId(jobId);
+    const { error } = await deleteJob(jobId);
+    if (!error) {
+      setJobs((prev) => prev.filter((j) => j.id !== jobId));
+      setConfirmDeleteJobId(null);
+      if (editingJobId === jobId) setEditingJobId(null);
+    }
+    setDeletingJobId(null);
+  };
 
   const handleMessageBidder = async (jobId: string, bid: any) => {
     const artisanUserId = bid.artisan_profiles?.user_id ?? bid.artisan_profiles?.profiles?.id ?? bid.artisan_id;
@@ -193,42 +250,247 @@ export default function CustomerJobsPage() {
                     </h3>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleBids(job.id)}
-                    className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold transition-all"
-                    style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {canEditJob(job.status) && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            editingJobId === job.id ? setEditingJobId(null) : startEditingJob(job)
+                          }
+                          className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold transition-all"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            color: 'var(--color-text)',
+                            border: '1px solid var(--color-border)',
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                        {confirmDeleteJobId === job.id ? (
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              disabled={deletingJobId === job.id}
+                              onClick={() => handleDeleteJob(job.id)}
+                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-xs font-semibold text-white disabled:opacity-60"
+                              style={{ backgroundColor: '#EF4444' }}
+                            >
+                              {deletingJobId === job.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                'Confirm'
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={deletingJobId === job.id}
+                              onClick={() => setConfirmDeleteJobId(null)}
+                              className="inline-flex items-center rounded-md px-2.5 py-2 text-xs font-medium"
+                              style={{
+                                background: 'var(--color-bg-secondary)',
+                                color: 'var(--color-text-secondary)',
+                                border: '1px solid var(--color-border)',
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteJobId(job.id)}
+                            className="inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-xs font-medium transition-all"
+                            style={{
+                              background: 'var(--color-bg-secondary)',
+                              color: '#EF4444',
+                              border: '1px solid var(--color-border)',
+                            }}
+                            aria-label="Delete job"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleBids(job.id)}
+                      className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold transition-all"
+                      style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary)' }}
+                    >
+                      <Gavel className="h-3.5 w-3.5" />
+                      {isExpanded ? 'Hide Bids' : `View Bids (${job.bid_count ?? 0})`}
+                    </button>
+                  </div>
+                </div>
+
+                {editingJobId === job.id ? (
+                  <form
+                    onSubmit={(e) => handleSaveJob(e, job.id)}
+                    className="pt-3 space-y-3"
+                    style={{ borderTop: '1px solid var(--color-border-light)' }}
                   >
-                    <Gavel className="h-3.5 w-3.5" />
-                    {isExpanded ? 'Hide Bids' : `View Bids (${job.bid_count ?? 0})`}
-                  </button>
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="sm:col-span-2 space-y-1">
+                        <label className="block text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                          Title
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={editForm.title}
+                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                          className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                          }}
+                        />
+                      </div>
+                      <div className="sm:col-span-2 space-y-1">
+                        <label className="block text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                          Description
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={editForm.description}
+                          onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                          className="w-full rounded-md px-3 py-2 text-sm outline-none resize-none"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                          Min Budget (₦)
+                        </label>
+                        <input
+                          type="number"
+                          value={editForm.budget_min}
+                          onChange={(e) => setEditForm({ ...editForm, budget_min: e.target.value })}
+                          className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                          Max Budget (₦)
+                        </label>
+                        <input
+                          type="number"
+                          value={editForm.budget_max}
+                          onChange={(e) => setEditForm({ ...editForm, budget_max: e.target.value })}
+                          className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                          Urgency
+                        </label>
+                        <select
+                          value={editForm.urgency}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, urgency: e.target.value as JobRequest['urgency'] })
+                          }
+                          className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                          }}
+                        >
+                          <option value="low">Low</option>
+                          <option value="normal">Normal</option>
+                          <option value="urgent">Urgent</option>
+                          <option value="emergency">Emergency</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                          Address
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.address}
+                          onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                          className="w-full rounded-md px-3 py-2 text-sm outline-none"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        disabled={savingJobId === job.id}
+                        onClick={() => setEditingJobId(null)}
+                        className="inline-flex items-center gap-1 rounded-md px-3.5 py-2 text-xs font-medium"
+                        style={{
+                          background: 'var(--color-bg-secondary)',
+                          color: 'var(--color-text-secondary)',
+                          border: '1px solid var(--color-border)',
+                        }}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={savingJobId === job.id}
+                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white gradient-primary disabled:opacity-60"
+                      >
+                        {savingJobId === job.id && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                        {savingJobId === job.id ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      {job.description}
+                    </p>
 
-                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  {job.description}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  {(job.budget_min != null || job.budget_max != null) && (
-                    <span className="inline-flex items-center gap-1 font-medium" style={{ color: 'var(--color-text)' }}>
-                      <DollarSign className="h-3.5 w-3.5" style={{ color: 'var(--color-accent)' }} />
-                      ₦{Number(job.budget_min ?? 0).toLocaleString()}
-                      {job.budget_max != null ? ` – ₦${Number(job.budget_max).toLocaleString()}` : ''}
-                    </span>
-                  )}
-                  {job.address && (
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {job.address}
-                    </span>
-                  )}
-                  {job.created_at && (
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      {new Date(job.created_at).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
+                    <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      {(job.budget_min != null || job.budget_max != null) && (
+                        <span className="inline-flex items-center gap-1 font-medium" style={{ color: 'var(--color-text)' }}>
+                          <DollarSign className="h-3.5 w-3.5" style={{ color: 'var(--color-accent)' }} />
+                          ₦{Number(job.budget_min ?? 0).toLocaleString()}
+                          {job.budget_max != null ? ` – ₦${Number(job.budget_max).toLocaleString()}` : ''}
+                        </span>
+                      )}
+                      {job.address && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {job.address}
+                        </span>
+                      )}
+                      {job.created_at && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {new Date(job.created_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 {isExpanded && (
                   <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--color-border-light)' }}>

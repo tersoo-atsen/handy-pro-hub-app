@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { LayoutDashboard, Users, Briefcase, AlertTriangle } from 'lucide-react';
 import { NavLink } from '@/components/nav-link';
+import { AdminSidebarAccount } from '@/features/admin/components/admin-sidebar-account';
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:5000').trim();
 
 const adminNav = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -9,7 +14,39 @@ const adminNav = [
   { label: 'Disputes', href: '/admin/disputes', icon: AlertTriangle },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('access_token')?.value;
+  if (!accessToken) {
+    redirect('/login');
+  }
+
+  let role: string | undefined;
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Cookie: cookieStore.toString(),
+      },
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const user = await res.json();
+      role = user?.role;
+    }
+  } catch {
+    role = undefined;
+  }
+
+  if (!role) {
+    redirect('/login');
+  }
+
+  if (role !== 'admin') {
+    redirect(role === 'artisan' ? '/artisan/dashboard' : '/customer/dashboard');
+  }
+
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--color-bg)' }}>
       <aside
@@ -39,6 +76,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </NavLink>
           ))}
         </nav>
+        <div className="p-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+          <AdminSidebarAccount />
+        </div>
       </aside>
       <div className="flex-1 lg:ml-64">
         <main className="p-6 lg:p-8 max-w-6xl">{children}</main>
